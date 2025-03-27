@@ -4,10 +4,10 @@ const app = @import("app.zig");
 pub const Ball = struct {
     const Self = @This();
 
+    app: *app.App,
     position: rl.Vector2,
     speed: rl.Vector2,
     radius: f32,
-    app: *app.App,
 
     pub fn init(
         a: *app.App,

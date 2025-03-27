@@ -15,7 +15,7 @@ pub const Shapes = struct {
         const player_position = rl.Vector2{ .x = self.app.screen.x - player_size.x - 10, .y = self.app.center.y - player_size.y / 2 };
 
         self.ball = ball.Ball.init(self.app, self.app.center, 7, 20);
-        self.player = paddle.Paddle.init(player_position, player_size, 6);
+        self.player = paddle.Paddle.init(self.app, player_position, player_size, 6);
     }
 
     pub fn draw(self: *Self) void {
@@ -25,5 +25,6 @@ pub const Shapes = struct {
 
     pub fn update(self: *Self) void {
         self.ball.update();
+        self.player.update();
     }
 };
