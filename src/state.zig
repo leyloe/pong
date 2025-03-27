@@ -30,11 +30,11 @@ pub const State = struct {
     }
 
     pub fn draw(self: *Self) void {
+        self.map.draw();
         self.ball.draw();
         self.player.draw();
         self.cpu.draw();
         self.score.draw();
-        self.map.draw();
     }
 
     pub fn update(self: *Self) void {
