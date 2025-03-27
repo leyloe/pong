@@ -12,7 +12,12 @@ pub const App = struct {
     windowTitle: [:0]const u8,
     shapes: shapes.Shapes,
 
-    pub fn init(width: i32, height: i32, fps: i32, title: [:0]const u8) Self {
+    pub fn init(
+        width: i32,
+        height: i32,
+        fps: i32,
+        title: [:0]const u8,
+    ) Self {
         const screen = rl.Vector2{
             .x = @as(f32, @floatFromInt(width)),
             .y = @as(f32, @floatFromInt(height)),
