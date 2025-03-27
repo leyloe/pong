@@ -29,6 +29,10 @@ pub const Paddle = struct {
         if (rl.isKeyDown(.down))
             self.position.y += self.speed;
 
+        self.limit_movement();
+    }
+
+    fn limit_movement(self: *Self) void {
         if (self.position.y <= 0)
             self.position.y = 0;
 
@@ -61,5 +65,7 @@ pub const CpuPaddle = struct {
 
         if ((self.paddle.position.y + self.paddle.size.y / 2) <= (self.paddle.app.shapes.ball.position.y))
             self.paddle.position.y += self.paddle.speed;
+
+        self.paddle.limit_movement();
     }
 };
