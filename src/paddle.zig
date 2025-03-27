@@ -56,6 +56,10 @@ pub const CpuPaddle = struct {
     }
 
     pub fn update(self: *Self) void {
-        if ((self.paddle.position.y + self.paddle.size.y / 2) > (self.paddle.app.shapes.ball.position.y)) {}
+        if ((self.paddle.position.y + self.paddle.size.y / 2) > (self.paddle.app.shapes.ball.position.y))
+            self.paddle.position.y -= self.paddle.speed;
+
+        if ((self.paddle.position.y + self.paddle.size.y / 2) <= (self.paddle.app.shapes.ball.position.y))
+            self.paddle.position.y += self.paddle.speed;
     }
 };
