@@ -9,6 +9,15 @@ pub const Ball = struct {
     radius: f32,
     app: *app.App,
 
+    pub fn init(a: *app.App, position: rl.Vector2, speed: f32, radius: f32) Self {
+        return Self{
+            .app = a,
+            .position = position,
+            .radius = radius,
+            .speed = rl.Vector2{ .x = speed, .y = speed },
+        };
+    }
+
     pub fn draw(self: *Self) void {
         rl.drawCircleV(self.position, self.radius, .white);
     }

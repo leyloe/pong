@@ -9,12 +9,7 @@ pub const Shapes = struct {
     ball: ball.Ball,
 
     pub fn setup(self: *Self) void {
-        self.ball = .{
-            .app = self.app,
-            .position = self.app.center,
-            .radius = 20.0,
-            .speed = rl.Vector2{ .x = 7.0, .y = 7.0 },
-        };
+        self.ball = ball.Ball.init(self.app, self.app.center, 7, 20);
     }
 
     pub fn draw(self: *Self) void {
