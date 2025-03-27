@@ -1,6 +1,6 @@
 const rl = @import("raylib");
 const app = @import("app.zig");
-const score = @import("score.zig");
+const game = @import("game.zig");
 
 pub const Ball = struct {
     const Self = @This();
@@ -28,19 +28,19 @@ pub const Ball = struct {
         rl.drawCircleV(self.position, self.radius, .white);
     }
 
-    pub fn update(self: *Self, s: *score.Score) void {
+    pub fn update(self: *Self, g: *game.Game) void {
         self.position = self.position.add(self.speed);
 
         if ((self.position.y + self.radius >= self.app.screen.y) or (self.position.y - self.radius <= 0))
             self.speed.y *= -1;
 
         if (self.position.x + self.radius >= self.app.screen.x) {
-            s.cpu_score += 1;
+            g.score.cpu_score += 1;
             self.reset_ball();
         }
 
         if (self.position.x - self.radius <= 0) {
-            s.player_score += 1;
+            g.score.player_score += 1;
             self.reset_ball();
         }
     }

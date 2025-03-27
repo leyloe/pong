@@ -5,7 +5,7 @@ const paddle = @import("paddle.zig");
 const score = @import("score.zig");
 const map = @import("map.zig");
 
-pub const State = struct {
+pub const Game = struct {
     const Self = @This();
 
     app: *app.App,
@@ -38,8 +38,8 @@ pub const State = struct {
     }
 
     pub fn update(self: *Self) void {
-        self.ball.update(&self.score);
-        self.player.update(&self.ball);
-        self.cpu.update(&self.ball);
+        self.ball.update(self);
+        self.player.update(self);
+        self.cpu.update(self);
     }
 };

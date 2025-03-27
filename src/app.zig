@@ -1,5 +1,5 @@
 const rl = @import("raylib");
-const state = @import("state.zig");
+const game = @import("game.zig");
 
 pub const App = struct {
     const Self = @This();
@@ -10,7 +10,7 @@ pub const App = struct {
     screen: rl.Vector2,
     center: rl.Vector2,
     windowTitle: [:0]const u8,
-    state: state.State,
+    game: game.Game,
 
     pub fn init(
         width: i32,
@@ -33,7 +33,7 @@ pub const App = struct {
                 .y = screen.y / 2.0,
             },
             .windowTitle = title,
-            .state = undefined,
+            .game = undefined,
         };
 
         return self;
@@ -45,20 +45,20 @@ pub const App = struct {
     }
 
     fn setup(self: *Self) void {
-        self.state.app = self;
-        self.state.setup();
+        self.game.app = self;
+        self.game.setup();
 
         rl.initWindow(self.screenWidth, self.screenHeight, self.windowTitle);
         rl.setTargetFPS(self.targetFPS);
     }
 
     fn update(self: *Self) void {
-        self.state.update();
+        self.game.update();
     }
 
     fn render(self: *Self) void {
         rl.clearBackground(.black);
-        self.state.draw();
+        self.game.draw();
     }
 
     fn game_loop(self: *Self) void {
