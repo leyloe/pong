@@ -3,6 +3,7 @@ const app = @import("app.zig");
 const ball = @import("ball.zig");
 const paddle = @import("paddle.zig");
 const score = @import("score.zig");
+const map = @import("map.zig");
 
 pub const State = struct {
     const Self = @This();
@@ -12,6 +13,7 @@ pub const State = struct {
     player: paddle.Paddle,
     cpu: paddle.CpuPaddle,
     score: score.Score,
+    map: map.Map,
 
     pub fn setup(self: *Self) void {
         const player_size = rl.Vector2{ .x = 25, .y = 120 };
@@ -24,6 +26,7 @@ pub const State = struct {
         self.player = paddle.Paddle.init(self.app, player_position, player_size, 6);
         self.cpu = paddle.CpuPaddle.init(self.app, cpu_position, cpu_size, 6);
         self.score = score.Score.init(self.app);
+        self.map = map.Map.init(self.app);
     }
 
     pub fn draw(self: *Self) void {
@@ -31,6 +34,7 @@ pub const State = struct {
         self.player.draw();
         self.cpu.draw();
         self.score.draw();
+        self.map.draw();
     }
 
     pub fn update(self: *Self) void {
