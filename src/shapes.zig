@@ -14,6 +14,7 @@ pub const Shapes = struct {
     pub fn setup(self: *Self) void {
         const player_size = rl.Vector2{ .x = 25, .y = 120 };
         const player_position = rl.Vector2{ .x = self.app.screen.x - player_size.x - 10, .y = self.app.center.y - player_size.y / 2 };
+
         const cpu_size = player_size;
         const cpu_position = rl.Vector2{ .x = 10, .y = self.app.screen.y / 2 - cpu_size.y - 2 };
 
