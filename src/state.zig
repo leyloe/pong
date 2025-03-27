@@ -2,6 +2,7 @@ const rl = @import("raylib");
 const app = @import("app.zig");
 const ball = @import("ball.zig");
 const paddle = @import("paddle.zig");
+const score = @import("score.zig");
 
 pub const State = struct {
     const Self = @This();
@@ -10,6 +11,7 @@ pub const State = struct {
     ball: ball.Ball,
     player: paddle.Paddle,
     cpu: paddle.CpuPaddle,
+    score: score.Score,
 
     pub fn setup(self: *Self) void {
         const player_size = rl.Vector2{ .x = 25, .y = 120 };
@@ -21,16 +23,18 @@ pub const State = struct {
         self.ball = ball.Ball.init(self.app, self.app.center, 7, 20);
         self.player = paddle.Paddle.init(self.app, player_position, player_size, 6);
         self.cpu = paddle.CpuPaddle.init(self.app, cpu_position, cpu_size, 6);
+        self.score = score.Score.init(self.app);
     }
 
     pub fn draw(self: *Self) void {
         self.ball.draw();
         self.player.draw();
         self.cpu.draw();
+        self.score.draw();
     }
 
     pub fn update(self: *Self) void {
-        self.ball.update();
+        self.ball.update(&self.score);
         self.player.update(&self.ball);
         self.cpu.update(&self.ball);
     }
