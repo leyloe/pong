@@ -50,4 +50,8 @@ pub const CpuPaddle = struct {
     ) Self {
         return Self{ .paddle = Paddle.init(a, position, size, speed) };
     }
+
+    pub fn draw(self: *Self) void {
+        self.paddle.draw();
+    }
 };

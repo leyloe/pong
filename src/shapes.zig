@@ -26,7 +26,7 @@ pub const Shapes = struct {
     pub fn draw(self: *Self) void {
         self.ball.draw();
         self.player.draw();
-        self.cpu.paddle.draw();
+        self.cpu.draw();
     }
 
     pub fn update(self: *Self) void {
