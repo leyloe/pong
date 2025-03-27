@@ -41,4 +41,13 @@ pub const CpuPaddle = struct {
     const Self = @This();
 
     paddle: Paddle,
+
+    pub fn init(
+        a: *app.App,
+        position: rl.Vector2,
+        size: rl.Vector2,
+        speed: f32,
+    ) Self {
+        return Self{ .paddle = Paddle.init(a, position, size, speed) };
+    }
 };
