@@ -15,4 +15,8 @@ pub const Paddle = struct {
     ) Self {
         return Self{ .position = position, .size = size, .speed = speed };
     }
+
+    pub fn draw(self: *Self) void {
+        rl.drawRectangleV(self.position, self.size, .white);
+    }
 };
