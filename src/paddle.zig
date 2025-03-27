@@ -23,7 +23,7 @@ pub const Paddle = struct {
         rl.drawRectangleV(self.position, self.size, .white);
     }
 
-    pub fn update(self: *Self) void {
+    pub fn update(self: *Self, b: *ball.Ball) void {
         if (rl.isKeyDown(.up))
             self.position.y -= self.speed;
 
@@ -31,6 +31,7 @@ pub const Paddle = struct {
             self.position.y += self.speed;
 
         self.limit_movement();
+        self.handle_collision(b);
     }
 
     fn limit_movement(self: *Self) void {
@@ -41,7 +42,7 @@ pub const Paddle = struct {
             self.position.y = self.app.screen.y - self.size.y;
     }
 
-    pub fn handle_collision(self: *Self, b: *ball.Ball) void {
+    fn handle_collision(self: *Self, b: *ball.Ball) void {
         if (rl.checkCollisionCircleRec(b.position, b.radius, rl.Rectangle{ .x = self.position.x, .y = self.position.y, .width = self.size.x, .height = self.size.y }))
             b.speed.x *= -1;
     }
@@ -65,17 +66,14 @@ pub const CpuPaddle = struct {
         self.paddle.draw();
     }
 
-    pub fn update(self: *Self, ball_position: rl.Vector2) void {
-        if ((self.paddle.position.y + self.paddle.size.y / 2) > (ball_position.y))
+    pub fn update(self: *Self, b: *ball.Ball) void {
+        if ((self.paddle.position.y + self.paddle.size.y / 2) > (b.position.y))
             self.paddle.position.y -= self.paddle.speed;
 
-        if ((self.paddle.position.y + self.paddle.size.y / 2) <= (ball_position.y))
+        if ((self.paddle.position.y + self.paddle.size.y / 2) <= (b.position.y))
             self.paddle.position.y += self.paddle.speed;
 
         self.paddle.limit_movement();
-    }
-
-    pub fn handle_collision(self: *Self, b: *ball.Ball) void {
         self.paddle.handle_collision(b);
     }
 };
