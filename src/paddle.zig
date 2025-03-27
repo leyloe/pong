@@ -1,5 +1,6 @@
 const rl = @import("raylib");
 const app = @import("app.zig");
+const ball = @import("ball.zig");
 
 pub const Paddle = struct {
     const Self = @This();
@@ -39,6 +40,11 @@ pub const Paddle = struct {
         if (self.position.y + self.size.y >= self.app.screen.y)
             self.position.y = self.app.screen.y - self.size.y;
     }
+
+    pub fn handle_collision(self: *Self, b: *ball.Ball) void {
+        if (rl.checkCollisionCircleRec(b.position, b.radius, rl.Rectangle{ .x = self.position.x, .y = self.position.y, .width = self.size.x, .height = self.size.y }))
+            b.speed.x *= -1;
+    }
 };
 
 pub const CpuPaddle = struct {
@@ -67,5 +73,9 @@ pub const CpuPaddle = struct {
             self.paddle.position.y += self.paddle.speed;
 
         self.paddle.limit_movement();
+    }
+
+    pub fn handle_collision(self: *Self, b: *ball.Ball) void {
+        self.paddle.handle_collision(b);
     }
 };

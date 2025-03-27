@@ -33,5 +33,8 @@ pub const Shapes = struct {
         self.ball.update();
         self.player.update();
         self.cpu.update(self.ball.position);
+
+        self.player.handle_collision(&self.ball);
+        self.cpu.handle_collision(&self.ball);
     }
 };
