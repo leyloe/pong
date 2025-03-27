@@ -23,7 +23,7 @@ pub const App = struct {
             .y = @as(f32, @floatFromInt(height)),
         };
 
-        var self = Self{
+        const self = Self{
             .screenWidth = width,
             .screenHeight = height,
             .targetFPS = fps,
@@ -36,10 +36,12 @@ pub const App = struct {
             .shapes = undefined,
         };
 
+        return self;
+    }
+
+    pub fn run(self: *Self) void {
         self.setup();
         self.game_loop();
-
-        return self;
     }
 
     fn setup(self: *Self) void {

@@ -8,4 +8,6 @@ const windowTitle = "Pong";
 pub fn main() void {
     var a = app.App.init(screenWidth, screenHeight, targetFPS, windowTitle);
     defer a.deinit();
+
+    a.run();
 }
