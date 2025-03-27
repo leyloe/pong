@@ -2,7 +2,7 @@ const rl = @import("raylib");
 const app = @import("app.zig");
 const ball = @import("ball.zig");
 
-pub const Sprites = struct {
+pub const Shapes = struct {
     const Self = @This();
 
     app: *app.App,
