@@ -3,7 +3,7 @@ const app = @import("app.zig");
 const ball = @import("ball.zig");
 const paddle = @import("paddle.zig");
 
-pub const Shapes = struct {
+pub const State = struct {
     const Self = @This();
 
     app: *app.App,
