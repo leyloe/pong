@@ -59,11 +59,11 @@ pub const CpuPaddle = struct {
         self.paddle.draw();
     }
 
-    pub fn update(self: *Self) void {
-        if ((self.paddle.position.y + self.paddle.size.y / 2) > (self.paddle.app.shapes.ball.position.y))
+    pub fn update(self: *Self, ball_position: rl.Vector2) void {
+        if ((self.paddle.position.y + self.paddle.size.y / 2) > (ball_position.y))
             self.paddle.position.y -= self.paddle.speed;
 
-        if ((self.paddle.position.y + self.paddle.size.y / 2) <= (self.paddle.app.shapes.ball.position.y))
+        if ((self.paddle.position.y + self.paddle.size.y / 2) <= (ball_position.y))
             self.paddle.position.y += self.paddle.speed;
 
         self.paddle.limit_movement();

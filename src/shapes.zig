@@ -32,6 +32,6 @@ pub const Shapes = struct {
     pub fn update(self: *Self) void {
         self.ball.update();
         self.player.update();
-        self.cpu.update();
+        self.cpu.update(self.ball.position);
     }
 };
