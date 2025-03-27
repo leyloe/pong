@@ -11,8 +11,11 @@ pub const Shapes = struct {
     player: paddle.Paddle,
 
     pub fn setup(self: *Self) void {
+        const player_size = rl.Vector2{ .x = 25, .y = 120 };
+        const player_position = rl.Vector2{ .x = self.app.screen.x - player_size.x - 10, .y = self.app.center.y - player_size.y / 2 };
+
         self.ball = ball.Ball.init(self.app, self.app.center, 7, 20);
-        self.player = paddle.Paddle.init(self.app.center, rl.Vector2{ .x = 50, .y = 50 }, 5);
+        self.player = paddle.Paddle.init(player_position, player_size, 6);
     }
 
     pub fn draw(self: *Self) void {
