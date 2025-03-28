@@ -31,6 +31,15 @@ pub fn build(b: *std.Build) void {
     exe.root_module.addImport("raylib", raylib);
     exe.root_module.addImport("raygui", raygui);
 
+    const gns_dep = b.dependency("gns", .{
+        .target = target,
+        .optimize = optimize,
+    });
+
+    _ = gns_dep;
+
+    // Now what?
+
     exe.linkLibC();
 
     // Deps end
