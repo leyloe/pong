@@ -36,9 +36,7 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
-    _ = gns_dep;
-
-    // Now what?
+    _ = gns_dep; // Now what?
 
     exe.linkLibC();
 
