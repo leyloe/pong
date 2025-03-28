@@ -8,8 +8,8 @@ pub const Score = struct {
     player_score: u32,
     cpu_score: u32,
 
-    pub fn init(a: *app.App) Self {
-        return Self{ .app = a, .player_score = 0, .cpu_score = 0 };
+    pub fn init(appInstance: *app.App) Self {
+        return Self{ .app = appInstance, .player_score = 0, .cpu_score = 0 };
     }
 
     pub fn draw(self: *Self) void {

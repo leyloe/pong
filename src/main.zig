@@ -6,8 +6,8 @@ const targetFPS = 60;
 const windowTitle = "Pong";
 
 pub fn main() void {
-    var a = app.App.init(screenWidth, screenHeight, targetFPS, windowTitle);
-    defer a.deinit();
+    var appInstance = app.App.init(screenWidth, screenHeight, targetFPS, windowTitle);
+    defer appInstance.deinit();
 
-    a.run();
+    appInstance.run();
 }

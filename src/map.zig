@@ -8,11 +8,11 @@ pub const Map = struct {
     line_start: rl.Vector2,
     line_end: rl.Vector2,
 
-    pub fn init(a: *app.App) Self {
+    pub fn init(appInstance: *app.App) Self {
         return Self{
-            .app = a,
-            .line_start = .{ .x = a.screen.x / 2, .y = 0 },
-            .line_end = .{ .x = a.screen.x / 2, .y = a.screen.y },
+            .app = appInstance,
+            .line_start = .{ .x = appInstance.screen.x / 2, .y = 0 },
+            .line_end = .{ .x = appInstance.screen.x / 2, .y = appInstance.screen.y },
         };
     }
 

@@ -11,13 +11,13 @@ pub const Ball = struct {
     radius: f32,
 
     pub fn init(
-        a: *app.App,
+        appInstance: *app.App,
         position: rl.Vector2,
         speed: f32,
         radius: f32,
     ) Self {
         return Self{
-            .app = a,
+            .app = appInstance,
             .position = position,
             .radius = radius,
             .speed = rl.Vector2{ .x = speed, .y = speed },
@@ -28,19 +28,19 @@ pub const Ball = struct {
         rl.drawCircleV(self.position, self.radius, .white);
     }
 
-    pub fn update(self: *Self, g: *game.Game) void {
+    pub fn update(self: *Self, gameInstance: *game.Game) void {
         self.position = self.position.add(self.speed);
 
         if ((self.position.y + self.radius >= self.app.screen.y) or (self.position.y - self.radius <= 0))
             self.speed.y *= -1;
 
         if (self.position.x + self.radius >= self.app.screen.x) {
-            g.score.cpu_score += 1;
+            gameInstance.score.cpu_score += 1;
             self.reset_ball();
         }
 
         if (self.position.x - self.radius <= 0) {
-            g.score.player_score += 1;
+            gameInstance.score.player_score += 1;
             self.reset_ball();
         }
     }
