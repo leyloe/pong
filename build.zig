@@ -1,7 +1,14 @@
 const std = @import("std");
 
-fn build_gns(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.builtin.OptimizeMode) void // *std.Build.Module
+fn build_gns(
+    b: *std.Build,
+    target: std.Build.ResolvedTarget,
+    optimize: std.builtin.OptimizeMode,
+) !void // *std.Build.Module
 {
+    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    defer arena.deinit();
+
     const gns_dep = b.dependency("gns", .{
         .target = target,
         .optimize = optimize,
@@ -19,21 +26,32 @@ fn build_gns(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.buil
         else => "-DCMAKE_BUILD_TYPE=Release",
     };
 
+    const gns_build_dir = try b.cache_root.join(arena.allocator(), &.{"gns_build"});
+    std.debug.print("gns_build_dir: {s}\n", .{gns_build_dir});
+
     const cmake_configure = b.addSystemCommand(&.{
         cmake,
         "-DBUILD_SHARED_LIBS=OFF",
         cmake_build_type,
         "-S",
+        gns_src_path.getPath(b),
+        "-B",
+        gns_build_dir,
     });
-    cmake_configure.addDirectoryArg(gns_src_path);
-    cmake_configure.addArg("-B");
-    const gns_build_dir = cmake_configure.addOutputDirectoryArg("gns_build");
 
-    const cmake_build = b.addSystemCommand(&.{ cmake, "--build" });
-    cmake_build.addDirectoryArg(gns_build_dir);
+    const cmake_build = b.addSystemCommand(&.{
+        cmake,
+        "--build",
+        gns_build_dir,
+    });
+    cmake_build.step.dependOn(&cmake_configure.step);
+
+    const gns_include_dir = try gns_src_path.join(arena.allocator(), "include");
+
+    std.debug.print("gns_include_dir: {s}\n", .{gns_include_dir.getPath(b)});
 }
 
-pub fn build(b: *std.Build) void {
+pub fn build(b: *std.Build) !void {
     const target = b.standardTargetOptions(.{});
 
     const optimize = b.standardOptimizeOption(.{});
@@ -66,7 +84,7 @@ pub fn build(b: *std.Build) void {
 
     exe.linkLibC();
 
-    const gns_lib = build_gns(b, target, optimize);
+    const gns_lib = try build_gns(b, target, optimize);
     _ = gns_lib;
 
     // Deps end
