@@ -1,5 +1,5 @@
 const app = @import("app.zig");
-const c = @cImport("steam/steamtypes.h");
+const c = @cImport(@cInclude("steam/steamtypes.h"));
 
 const screenWidth = 1280;
 const screenHeight = 800;
