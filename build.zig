@@ -1,10 +1,15 @@
 const std = @import("std");
 
-fn build_gns(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.builtin.OptimizeMode) *std.Build.Module {
+fn build_gns(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.builtin.OptimizeMode) void // *std.Build.Module
+{
     const gns_dep = b.dependency("gns", .{
         .target = target,
         .optimize = optimize,
     });
+
+    const gns_src_path = gns_dep.path("");
+
+    std.debug.print("gns_src_path: {s}\n", .{gns_src_path.getPath(b)});
 
     const cmake = b.findProgram(&.{"cmake"}, &.{}) catch @panic("CMake not found");
 
@@ -16,9 +21,16 @@ fn build_gns(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.buil
 
     const cmake_configure = b.addSystemCommand(&.{
         cmake,
+        "-DBUILD_SHARED_LIBS=OFF",
         cmake_build_type,
         "-S",
     });
+    cmake_configure.addDirectoryArg(gns_src_path);
+    cmake_configure.addArg("-B");
+    const gns_build_dir = cmake_configure.addOutputDirectoryArg("gns_build");
+
+    const cmake_build = b.addSystemCommand(&.{ cmake, "--build" });
+    cmake_build.addDirectoryArg(gns_build_dir);
 }
 
 pub fn build(b: *std.Build) void {
@@ -53,6 +65,9 @@ pub fn build(b: *std.Build) void {
     exe.root_module.addImport("raygui", raygui);
 
     exe.linkLibC();
+
+    const gns_lib = build_gns(b, target, optimize);
+    _ = gns_lib;
 
     // Deps end
 
