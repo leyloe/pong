@@ -2,13 +2,19 @@ const std = @import("std");
 
 fn build_gns(
     b: *std.Build,
+    target: std.Build.ResolvedTarget,
     optimize: std.builtin.OptimizeMode,
-    dependency: *std.Build.Dependency,
-) !*std.Build.Module {
+    exe: *std.Build.Step.Compile,
+) !void {
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
     defer arena.deinit();
 
-    const gns_src_path = dependency.path("");
+    const gns_dep = b.dependency("gns", .{
+        .target = target,
+        .optimize = optimize,
+    });
+
+    const gns_src_path = gns_dep.path("");
 
     const cmake = b.findProgram(&.{"cmake"}, &.{}) catch @panic("CMake not found");
 
@@ -42,17 +48,15 @@ fn build_gns(
     });
     cmake_build.step.dependOn(&cmake_configure.step);
 
-    const gns_include_dir = try gns_src_path.join(arena.allocator(), "include/steam");
-    const gns_lib_path = b.pathJoin(&.{ gns_build_dir, "bin" });
-
-    const gns = dependency.module("gns");
+    const gns_include_dir = try gns_src_path.join(arena.allocator(), "include");
+    const gns_lib_path = b.pathJoin(&.{ gns_build_dir, "src" });
 
     const gnd_object_file_path = b.pathJoin(&.{ gns_lib_path, "libGameNetworkingSockets_s.a" });
 
-    gns.addIncludePath(gns_include_dir);
-    gns.addObjectFile(.{ .cwd_relative = gnd_object_file_path });
+    exe.addIncludePath(gns_include_dir);
+    exe.addObjectFile(.{ .cwd_relative = gnd_object_file_path });
 
-    return gns;
+    exe.step.dependOn(&cmake_build.step);
 }
 
 pub fn build(b: *std.Build) !void {
@@ -89,16 +93,7 @@ pub fn build(b: *std.Build) !void {
     exe.linkLibC();
     exe.linkLibCpp();
 
-    const gns_dep = b.dependency("gns", .{
-        .target = target,
-        .optimize = optimize,
-    });
-
-    const gns = try build_gns(b, optimize, gns_dep);
-    const gns_artifact = gns_dep.artifact("gns");
-
-    exe.linkLibrary(gns_artifact);
-    exe.root_module.addImport("gns", gns);
+    try build_gns(b, target, optimize, exe);
 
     // Deps end
 
