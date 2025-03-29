@@ -6,15 +6,19 @@ fn build_gns(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.buil
         .optimize = optimize,
     });
 
-    const cmake = gns_dep.builder.findProgram(&.{"cmake"}, &.{}) catch @panic("CMake not found");
+    const cmake = b.findProgram(&.{"cmake"}, &.{}) catch @panic("CMake not found");
 
-    const build_type = switch (optimize) {
+    const cmake_build_type = switch (optimize) {
         .Debug => "-DCMAKE_BUILD_TYPE=Debug",
-        .ReleaseFast => "-DCMAKE_BUILD_TYPE=Release",
-        .ReleaseSafe => "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
         .ReleaseSmall => "-DCMAKE_BUILD_TYPE=MinSizeRel",
-        else => @panic("Unknown optimize mode"),
+        else => "-DCMAKE_BUILD_TYPE=Release",
     };
+
+    const cmake_configure = b.addSystemCommand(&.{
+        cmake,
+        cmake_build_type,
+        "-S",
+    });
 }
 
 pub fn build(b: *std.Build) void {
