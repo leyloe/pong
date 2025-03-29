@@ -1,5 +1,22 @@
 const std = @import("std");
 
+fn build_gns(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.builtin.OptimizeMode) *std.Build.Module {
+    const gns_dep = b.dependency("gns", .{
+        .target = target,
+        .optimize = optimize,
+    });
+
+    const cmake = gns_dep.builder.findProgram(&.{"cmake"}, &.{}) catch @panic("CMake not found");
+
+    const build_type = switch (optimize) {
+        .Debug => "-DCMAKE_BUILD_TYPE=Debug",
+        .ReleaseFast => "-DCMAKE_BUILD_TYPE=Release",
+        .ReleaseSafe => "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
+        .ReleaseSmall => "-DCMAKE_BUILD_TYPE=MinSizeRel",
+        else => @panic("Unknown optimize mode"),
+    };
+}
+
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
 
@@ -30,13 +47,6 @@ pub fn build(b: *std.Build) void {
     exe.linkLibrary(raylib_artifact);
     exe.root_module.addImport("raylib", raylib);
     exe.root_module.addImport("raygui", raygui);
-
-    const gns_dep = b.dependency("gns", .{
-        .target = target,
-        .optimize = optimize,
-    });
-
-    _ = gns_dep; // Now what?
 
     exe.linkLibC();
 
