@@ -2,21 +2,13 @@ const std = @import("std");
 
 fn build_gns(
     b: *std.Build,
-    target: std.Build.ResolvedTarget,
     optimize: std.builtin.OptimizeMode,
-) !void // *std.Build.Module
-{
+    dependency: *std.Build.Dependency,
+) !*std.Build.Module {
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
     defer arena.deinit();
 
-    const gns_dep = b.dependency("gns", .{
-        .target = target,
-        .optimize = optimize,
-    });
-
-    const gns_src_path = gns_dep.path("");
-
-    std.debug.print("gns_src_path: {s}\n", .{gns_src_path.getPath(b)});
+    const gns_src_path = dependency.path("");
 
     const cmake = b.findProgram(&.{"cmake"}, &.{}) catch @panic("CMake not found");
 
@@ -31,11 +23,11 @@ fn build_gns(
         .ReleaseSmall => "gns-minsizerel",
         else => "gns-release",
     }});
-    std.debug.print("gns_build_dir: {s}\n", .{gns_build_dir});
 
     const cmake_configure = b.addSystemCommand(&.{
         cmake,
-        "-DBUILD_SHARED_LIBS=OFF",
+        "-DBUILD_SHARED_LIB=OFF",
+        "-DBUILD_STATIC_LIB=ON",
         cmake_build_type,
         "-S",
         gns_src_path.getPath(b),
@@ -50,11 +42,17 @@ fn build_gns(
     });
     cmake_build.step.dependOn(&cmake_configure.step);
 
-    const gns_include_dir = try gns_src_path.join(arena.allocator(), "include");
+    const gns_include_dir = try gns_src_path.join(arena.allocator(), "include/steam");
     const gns_lib_path = b.pathJoin(&.{ gns_build_dir, "bin" });
 
-    std.debug.print("gns_include_dir: {s}\n", .{gns_include_dir.getPath(b)});
-    std.debug.print("gns_lib_path: {s}\n", .{gns_lib_path});
+    const gns = dependency.module("gns");
+
+    const gnd_object_file_path = b.pathJoin(&.{ gns_lib_path, "libGameNetworkingSockets_s.a" });
+
+    gns.addIncludePath(gns_include_dir);
+    gns.addObjectFile(.{ .cwd_relative = gnd_object_file_path });
+
+    return gns;
 }
 
 pub fn build(b: *std.Build) !void {
@@ -89,9 +87,18 @@ pub fn build(b: *std.Build) !void {
     exe.root_module.addImport("raygui", raygui);
 
     exe.linkLibC();
+    exe.linkLibCpp();
 
-    const gns_lib = try build_gns(b, target, optimize);
-    _ = gns_lib;
+    const gns_dep = b.dependency("gns", .{
+        .target = target,
+        .optimize = optimize,
+    });
+
+    const gns = try build_gns(b, optimize, gns_dep);
+    const gns_artifact = gns_dep.artifact("gns");
+
+    exe.linkLibrary(gns_artifact);
+    exe.root_module.addImport("gns", gns);
 
     // Deps end
 
