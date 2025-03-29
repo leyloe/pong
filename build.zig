@@ -26,7 +26,11 @@ fn build_gns(
         else => "-DCMAKE_BUILD_TYPE=Release",
     };
 
-    const gns_build_dir = try b.cache_root.join(arena.allocator(), &.{"gns_build"});
+    const gns_build_dir = try b.cache_root.join(arena.allocator(), &.{switch (optimize) {
+        .Debug => "gns-debug",
+        .ReleaseSmall => "gns-minsizerel",
+        else => "gns-release",
+    }});
     std.debug.print("gns_build_dir: {s}\n", .{gns_build_dir});
 
     const cmake_configure = b.addSystemCommand(&.{
@@ -47,8 +51,10 @@ fn build_gns(
     cmake_build.step.dependOn(&cmake_configure.step);
 
     const gns_include_dir = try gns_src_path.join(arena.allocator(), "include");
+    const gns_lib_path = b.pathJoin(&.{ gns_build_dir, "bin" });
 
     std.debug.print("gns_include_dir: {s}\n", .{gns_include_dir.getPath(b)});
+    std.debug.print("gns_lib_path: {s}\n", .{gns_lib_path});
 }
 
 pub fn build(b: *std.Build) !void {
