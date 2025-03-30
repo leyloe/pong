@@ -1,6 +1,6 @@
 const std = @import("std");
 
-fn build_en(
+fn build_enet(
     b: *std.Build,
     target: std.Build.ResolvedTarget,
     optimize: std.builtin.OptimizeMode,
@@ -86,7 +86,7 @@ pub fn build(b: *std.Build) !void {
     exe.root_module.addImport("raylib", raylib);
     exe.root_module.addImport("raygui", raygui);
 
-    try build_en(b, target, optimize, exe);
+    try build_enet(b, target, optimize, exe);
 
     exe.linkLibC();
 
