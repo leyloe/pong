@@ -6,9 +6,6 @@ fn build_gns(
     optimize: std.builtin.OptimizeMode,
     exe: *std.Build.Step.Compile,
 ) !void {
-    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
-    defer arena.deinit();
-
     const gns_dep = b.dependency("gns", .{
         .target = target,
         .optimize = optimize,
@@ -24,11 +21,17 @@ fn build_gns(
         else => "-DCMAKE_BUILD_TYPE=Release",
     };
 
-    const gns_build_dir = try b.cache_root.join(arena.allocator(), &.{switch (optimize) {
+    // const gns_build_dir = try b.cache_root.join(arena.allocator(), &.{switch (optimize) {
+    //     .Debug => "gns-debug",
+    //     .ReleaseSmall => "gns-minsizerel",
+    //     else => "gns-release",
+    // }});
+
+    const gns_build_dir = b.pathJoin(&.{ b.cache_root.path.?, switch (optimize) {
         .Debug => "gns-debug",
         .ReleaseSmall => "gns-minsizerel",
         else => "gns-release",
-    }});
+    } });
 
     const cmake_configure = b.addSystemCommand(&.{
         cmake,
@@ -48,12 +51,12 @@ fn build_gns(
     });
     cmake_build.step.dependOn(&cmake_configure.step);
 
-    const gns_include_dir = try gns_src_path.join(arena.allocator(), "include");
+    const gns_include_dir = b.pathJoin(&.{ gns_src_path.getPath(b), "include" });
     const gns_lib_path = b.pathJoin(&.{ gns_build_dir, "src" });
 
     const gnd_object_file_path = b.pathJoin(&.{ gns_lib_path, "libGameNetworkingSockets_s.a" });
 
-    exe.addIncludePath(gns_include_dir);
+    exe.addIncludePath(.{ .cwd_relative = gns_include_dir });
     exe.addObjectFile(.{ .cwd_relative = gnd_object_file_path });
 
     exe.step.dependOn(&cmake_build.step);

@@ -1,6 +1,6 @@
 const app = @import("app.zig");
 
-const c = @cImport(@cInclude("steam/steamtypes.h"));
+const c = @cImport(@cInclude("steam/steamnetworkingsockets.h"));
 
 const screenWidth = 1280;
 const screenHeight = 800;
@@ -8,8 +8,7 @@ const targetFPS = 60;
 const windowTitle = "Pong";
 
 pub fn main() void {
-    const steam_call: c.lint64 = 0;
-    _ = steam_call;
+    c.GameNetworkingSockets_Kill();
 
     var appInstance = app.App.init(screenWidth, screenHeight, targetFPS, windowTitle);
     defer appInstance.deinit();
