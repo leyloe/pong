@@ -21,12 +21,6 @@ fn build_gns(
         else => "-DCMAKE_BUILD_TYPE=Release",
     };
 
-    // const gns_build_dir = try b.cache_root.join(arena.allocator(), &.{switch (optimize) {
-    //     .Debug => "gns-debug",
-    //     .ReleaseSmall => "gns-minsizerel",
-    //     else => "gns-release",
-    // }});
-
     const gns_build_dir = b.pathJoin(&.{ b.cache_root.path.?, switch (optimize) {
         .Debug => "gns-debug",
         .ReleaseSmall => "gns-minsizerel",
