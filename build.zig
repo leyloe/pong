@@ -96,7 +96,6 @@ pub fn build(b: *std.Build) !void {
     try build_gns(b, target, optimize, exe);
 
     exe.linkLibC();
-    exe.linkLibCpp();
 
     // Deps end
 
