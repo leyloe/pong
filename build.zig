@@ -48,7 +48,7 @@ fn build_gns(
     });
     cmake_build.step.dependOn(&cmake_configure.step);
 
-    const gns_include_dir = try gns_src_path.join(arena.allocator(), "include");
+    const gns_include_dir = try gns_src_path.join(arena.allocator(), "include/steam");
     const gns_lib_path = b.pathJoin(&.{ gns_build_dir, "src" });
 
     const gnd_object_file_path = b.pathJoin(&.{ gns_lib_path, "libGameNetworkingSockets_s.a" });
@@ -90,10 +90,10 @@ pub fn build(b: *std.Build) !void {
     exe.root_module.addImport("raylib", raylib);
     exe.root_module.addImport("raygui", raygui);
 
+    try build_gns(b, target, optimize, exe);
+
     exe.linkLibC();
     exe.linkLibCpp();
-
-    try build_gns(b, target, optimize, exe);
 
     // Deps end
 
