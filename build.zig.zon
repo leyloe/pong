@@ -12,9 +12,9 @@
             .url = "git+https://github.com/Not-Nik/raylib-zig?ref=devel#e072ff119be71727ec4e1b0cb6d8f892b32ff440",
             .hash = "raylib_zig-5.6.0-dev-KE8REGgxBQDoHuPWlO7RnY7M1jFlWV4kP1QY7r52GoP-",
         },
-        .gns = .{
-            .url = "git+https://github.com/ValveSoftware/GameNetworkingSockets#725e273c7442bac7a8bc903c0b210b1c15c34d92",
-            .hash = "N-V-__8AAG9PagEDvfLffNQdvABbEQ0nfQVDvBBmzz0_a8bu",
+        .en = .{
+            .url = "git+https://github.com/zpl-c/enet#90471c70234299808f5cb983c0009afbad3e71fa",
+            .hash = "N-V-__8AAMLyBADa8ORhUejySKg-yOf9YnHTH7lYkC-ec5-t",
         },
     },
 

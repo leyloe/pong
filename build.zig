@@ -1,17 +1,17 @@
 const std = @import("std");
 
-fn build_gns(
+fn build_en(
     b: *std.Build,
     target: std.Build.ResolvedTarget,
     optimize: std.builtin.OptimizeMode,
     exe: *std.Build.Step.Compile,
 ) !void {
-    const gns_dep = b.dependency("gns", .{
+    const en_dep = b.dependency("en", .{
         .target = target,
         .optimize = optimize,
     });
 
-    const gns_src_path = gns_dep.path("");
+    const en_src_path = en_dep.path("");
 
     const cmake = b.findProgram(&.{"cmake"}, &.{}) catch @panic("CMake not found");
 
@@ -21,37 +21,36 @@ fn build_gns(
         else => "-DCMAKE_BUILD_TYPE=Release",
     };
 
-    const gns_build_dir = b.pathJoin(&.{ b.cache_root.path.?, switch (optimize) {
-        .Debug => "gns-debug",
-        .ReleaseSmall => "gns-minsizerel",
-        else => "gns-release",
+    const en_build_dir = b.pathJoin(&.{ b.cache_root.path.?, switch (optimize) {
+        .Debug => "en-debug",
+        .ReleaseSmall => "en-minsizerel",
+        else => "en-release",
     } });
 
     const cmake_configure = b.addSystemCommand(&.{
         cmake,
-        "-DBUILD_SHARED_LIB=OFF",
-        "-DBUILD_STATIC_LIB=ON",
+        "-DENET_STATIC=1",
         cmake_build_type,
         "-S",
-        gns_src_path.getPath(b),
+        en_src_path.getPath(b),
         "-B",
-        gns_build_dir,
+        en_build_dir,
     });
 
     const cmake_build = b.addSystemCommand(&.{
         cmake,
         "--build",
-        gns_build_dir,
+        en_build_dir,
     });
     cmake_build.step.dependOn(&cmake_configure.step);
 
-    const gns_include_dir = b.pathJoin(&.{ gns_src_path.getPath(b), "include" });
-    const gns_lib_path = b.pathJoin(&.{ gns_build_dir, "src" });
+    const en_include_dir = b.pathJoin(&.{ en_src_path.getPath(b), "include" });
+    const en_lib_path = en_build_dir;
 
-    const gnd_object_file_path = b.pathJoin(&.{ gns_lib_path, "libGameNetworkingSockets_s.a" });
+    exe.addIncludePath(.{ .cwd_relative = en_include_dir });
+    exe.addLibraryPath(.{ .cwd_relative = en_lib_path });
 
-    exe.addIncludePath(.{ .cwd_relative = gns_include_dir });
-    exe.addObjectFile(.{ .cwd_relative = gnd_object_file_path });
+    exe.linkSystemLibrary("enet");
 
     exe.step.dependOn(&cmake_build.step);
 }
@@ -87,7 +86,7 @@ pub fn build(b: *std.Build) !void {
     exe.root_module.addImport("raylib", raylib);
     exe.root_module.addImport("raygui", raygui);
 
-    try build_gns(b, target, optimize, exe);
+    try build_en(b, target, optimize, exe);
 
     exe.linkLibC();
 
