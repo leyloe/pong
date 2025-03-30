@@ -8,7 +8,7 @@ const targetFPS = 60;
 const windowTitle = "Pong";
 
 pub fn main() void {
-    const steam_call: c.lint64 = undefined;
+    const steam_call: c.lint64 = 0;
     _ = steam_call;
 
     var appInstance = app.App.init(screenWidth, screenHeight, targetFPS, windowTitle);
