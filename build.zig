@@ -5,7 +5,7 @@ fn build_enet(
     target: std.Build.ResolvedTarget,
     optimize: std.builtin.OptimizeMode,
     exe: *std.Build.Step.Compile,
-) !void {
+) void {
     const en_dep = b.dependency("en", .{
         .target = target,
         .optimize = optimize,
@@ -55,7 +55,7 @@ fn build_enet(
     exe.step.dependOn(&cmake_build.step);
 }
 
-pub fn build(b: *std.Build) !void {
+pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
 
     const optimize = b.standardOptimizeOption(.{});
@@ -86,7 +86,7 @@ pub fn build(b: *std.Build) !void {
     exe.root_module.addImport("raylib", raylib);
     exe.root_module.addImport("raygui", raygui);
 
-    try build_enet(b, target, optimize, exe);
+    build_enet(b, target, optimize, exe);
 
     exe.linkLibC();
 
