@@ -7,6 +7,7 @@ pub const ClientError = error{
     ClientNull,
     SetHostFailure,
     PeerNull,
+    ConnectionFailure,
 };
 
 pub const Client = struct {
@@ -47,6 +48,11 @@ pub const Client = struct {
         self.peer = en.enet_host_connect(self.client, &self.address, 1, 0);
         if (self.peer == null) {
             return ClientError.PeerNull;
+        }
+
+        if (!(en.enet_host_service(self.client, &self.event, 5000) > 0 and self.event.type == en.ENET_EVENT_TYPE_CONNECT)) {
+            en.enet_peer_reset(self.peer);
+            return ClientError.ConnectionFailure;
         }
     }
 
