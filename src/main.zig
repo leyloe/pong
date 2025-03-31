@@ -8,8 +8,9 @@ const windowTitle = "Pong";
 
 pub fn main() !void {
     var clientInstance = client.Client.init();
-    try clientInstance.setup();
     defer clientInstance.deinit();
+
+    try clientInstance.setup();
 
     var appInstance = app.App.init(screenWidth, screenHeight, targetFPS, windowTitle);
     defer appInstance.deinit();
