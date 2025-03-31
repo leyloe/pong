@@ -6,6 +6,7 @@ pub const ClientError = error{
     InitFailure,
     ClientNull,
     SetHostFailure,
+    PeerNull,
 };
 
 pub const Client = struct {
@@ -35,13 +36,17 @@ pub const Client = struct {
         }
 
         self.client = en.enet_host_create(null, 1, 1, 0, 0);
-
         if (self.client == null) {
             return ClientError.ClientNull;
         }
 
         if (en.enet_address_set_host(&self.address, self.ip) != en.EXIT_SUCCESS) {
             return ClientError.SetHostFailure;
+        }
+
+        self.peer = en.enet_host_connect(self.client, &self.address, 1, 0);
+        if (self.peer == null) {
+            return ClientError.PeerNull;
         }
     }
 
