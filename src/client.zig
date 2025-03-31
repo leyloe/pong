@@ -44,6 +44,7 @@ pub const Client = struct {
         if (en.enet_address_set_host(&self.address, self.ip) != en.EXIT_SUCCESS) {
             return ClientError.SetHostFailure;
         }
+        self.address.port = self.port;
 
         self.peer = en.enet_host_connect(self.client, &self.address, 1, 0);
         if (self.peer == null) {
@@ -56,7 +57,8 @@ pub const Client = struct {
         }
     }
 
-    pub fn deinit(_: Self) void {
+    pub fn deinit(self: Self) void {
         defer en.enet_deinitialize();
+        defer en.enet_peer_disconnect(self.peer, 0);
     }
 };
