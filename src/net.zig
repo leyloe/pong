@@ -17,7 +17,7 @@ pub const Net = struct {
         return Self{};
     }
 
-    pub fn deinit(_: *Self) void {
+    pub fn deinit(_: Self) void {
         defer en.enet_deinitialize();
     }
 };

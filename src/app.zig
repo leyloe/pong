@@ -72,7 +72,7 @@ pub const App = struct {
         }
     }
 
-    pub fn deinit(_: *Self) void {
+    pub fn deinit(_: Self) void {
         defer rl.closeWindow();
     }
 };
