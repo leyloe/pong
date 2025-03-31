@@ -31,7 +31,7 @@ pub const Client = struct {
         };
     }
 
-    pub fn setup(self: *Self) ClientError!void {
+    pub fn connect(self: *Self) ClientError!void {
         if (en.enet_initialize() != en.EXIT_SUCCESS) {
             return ClientError.InitFailure;
         }
