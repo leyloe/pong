@@ -10,7 +10,7 @@ pub const Net = struct {
     const Self = @This();
 
     pub fn init() NetError!Self {
-        if (en.enet_initialize() == 0) {
+        if (en.enet_initialize() != 0) {
             return NetError.InitFailed;
         }
 

@@ -5,13 +5,13 @@ const game = @import("game.zig");
 pub const Ball = struct {
     const Self = @This();
 
-    app: *app.App,
+    app: *const app.App,
     position: rl.Vector2,
     speed: rl.Vector2,
     radius: f32,
 
     pub fn init(
-        appInstance: *app.App,
+        appInstance: *const app.App,
         position: rl.Vector2,
         speed: f32,
         radius: f32,

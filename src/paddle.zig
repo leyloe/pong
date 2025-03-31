@@ -5,13 +5,13 @@ const game = @import("game.zig");
 pub const Paddle = struct {
     const Self = @This();
 
-    app: *app.App,
+    app: *const app.App,
     position: rl.Vector2,
     size: rl.Vector2,
     speed: f32,
 
     pub fn init(
-        appInstance: *app.App,
+        appInstance: *const app.App,
         position: rl.Vector2,
         size: rl.Vector2,
         speed: f32,
@@ -54,7 +54,7 @@ pub const CpuPaddle = struct {
     paddle: Paddle,
 
     pub fn init(
-        appInstance: *app.App,
+        appInstance: *const app.App,
         position: rl.Vector2,
         size: rl.Vector2,
         speed: f32,

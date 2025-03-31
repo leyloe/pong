@@ -4,11 +4,11 @@ const app = @import("app.zig");
 pub const Score = struct {
     const Self = @This();
 
-    app: *app.App,
+    app: *const app.App,
     player_score: u32,
     cpu_score: u32,
 
-    pub fn init(appInstance: *app.App) Self {
+    pub fn init(appInstance: *const app.App) Self {
         return Self{ .app = appInstance, .player_score = 0, .cpu_score = 0 };
     }
 

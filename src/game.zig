@@ -8,7 +8,7 @@ const map = @import("map.zig");
 pub const Game = struct {
     const Self = @This();
 
-    app: *app.App,
+    app: *const app.App,
     ball: ball.Ball,
     player: paddle.Paddle,
     cpu: paddle.CpuPaddle,

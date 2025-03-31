@@ -4,11 +4,11 @@ const app = @import("app.zig");
 pub const Map = struct {
     const Self = @This();
 
-    app: *app.App,
+    app: *const app.App,
     line_start: rl.Vector2,
     line_end: rl.Vector2,
 
-    pub fn init(appInstance: *app.App) Self {
+    pub fn init(appInstance: *const app.App) Self {
         return Self{
             .app = appInstance,
             .line_start = .{ .x = appInstance.screen.x / 2, .y = 0 },
