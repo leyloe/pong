@@ -2,12 +2,12 @@ const en = @cImport({
     @cInclude("enet.h");
 });
 
-pub const NetError = error{
+pub const ClientError = error{
     InitFailed,
     ClientNull,
 };
 
-pub const Net = struct {
+pub const Client = struct {
     const Self = @This();
 
     client: [*c]en.ENetHost,
@@ -15,18 +15,22 @@ pub const Net = struct {
     event: en.ENetEvent,
 
     pub fn init() Self {
-        return Self{ .client = undefined };
+        return Self{
+            .client = undefined,
+            .address = undefined,
+            .event = undefined,
+        };
     }
 
-    pub fn setup(self: *Self) NetError!void {
+    pub fn setup(self: *Self) ClientError!void {
         if (en.enet_initialize() != en.EXIT_SUCCESS) {
-            return NetError.InitFailed;
+            return ClientError.InitFailed;
         }
 
         self.client = en.enet_host_create(null, 1, 1, 0, 0);
 
         if (self.client == null) {
-            return NetError.ClientNull;
+            return ClientError.ClientNull;
         }
     }
 
