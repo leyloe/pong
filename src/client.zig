@@ -17,7 +17,6 @@ pub const Client = struct {
     port: u16,
     client: [*c]en.ENetHost,
     address: en.ENetAddress,
-    event: en.ENetEvent,
     peer: [*c]en.ENetPeer,
 
     pub fn init(ip: [*c]const u8, port: u16) Self {
@@ -26,7 +25,6 @@ pub const Client = struct {
             .port = port,
             .client = undefined,
             .address = undefined,
-            .event = undefined,
             .peer = undefined,
         };
     }
@@ -51,7 +49,8 @@ pub const Client = struct {
             return ClientError.PeerNull;
         }
 
-        if (!(en.enet_host_service(self.client, &self.event, 5000) > 0 and self.event.type == en.ENET_EVENT_TYPE_CONNECT)) {
+        var event: en.ENetEvent = undefined;
+        if (!(en.enet_host_service(self.client, &event, 5000) > 0 and event.type == en.ENET_EVENT_TYPE_CONNECT)) {
             en.enet_peer_reset(self.peer);
             return ClientError.ConnectionFailure;
         }
@@ -60,5 +59,14 @@ pub const Client = struct {
     pub fn deinit(self: Self) void {
         defer en.enet_deinitialize();
         defer en.enet_peer_disconnect(self.peer, 0);
+        defer {
+            var event: en.ENetEvent = undefined;
+            while (en.enet_host_service(self.client, &event, 3000) > 0) {
+                switch (event.type) {
+                    en.ENET_EVENT_TYPE_RECEIVE => en.enet_packet_destroy(event.packet),
+                    else => {},
+                }
+            }
+        }
     }
 };
