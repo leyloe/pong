@@ -13,14 +13,12 @@ pub const Server = struct {
     port: u16,
     server: [*c]en.ENetHost,
     address: en.ENetAddress,
-    peer: [*c]en.ENetPeer,
 
     pub fn init(port: u16) Self {
         return Self{
             .port = port,
             .server = undefined,
             .address = undefined,
-            .peer = undefined,
         };
     }
 
