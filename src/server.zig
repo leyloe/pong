@@ -5,9 +5,6 @@ const en = @cImport({
 pub const ServerError = error{
     InitFailure,
     ServerNull,
-    SetHostFailure,
-    PeerNull,
-    ConnectionFailure,
 };
 
 pub const Server = struct {
