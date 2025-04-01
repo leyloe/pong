@@ -38,7 +38,8 @@ pub const Server = struct {
         }
     }
 
-    pub fn deinit(_: Self) void {
+    pub fn deinit(self: Self) void {
         defer en.enet_deinitialize();
+        defer en.enet_host_destroy(self.server);
     }
 };

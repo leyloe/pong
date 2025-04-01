@@ -58,6 +58,7 @@ pub const Client = struct {
 
     pub fn deinit(self: Self) void {
         defer en.enet_deinitialize();
+        defer en.enet_host_destroy(self.client);
         defer en.enet_peer_disconnect(self.peer, 0);
         defer {
             var event: en.ENetEvent = undefined;
