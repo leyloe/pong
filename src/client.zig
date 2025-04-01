@@ -63,8 +63,13 @@ pub const Client = struct {
             var event: en.ENetEvent = undefined;
             while (en.enet_host_service(self.client, &event, 3000) > 0) {
                 switch (event.type) {
-                    en.ENET_EVENT_TYPE_RECEIVE => en.enet_packet_destroy(event.packet),
-                    else => {},
+                    en.ENET_EVENT_TYPE_RECEIVE => {
+                        en.enet_packet_destroy(event.packet);
+                        break;
+                    },
+                    else => {
+                        break;
+                    },
                 }
             }
         }

@@ -8,7 +8,7 @@ const windowTitle = "Pong";
 
 pub fn main() !void {
     var clientInstance = client.Client.init("127.0.0.1", 13333);
-    clientInstance.deinit();
+    defer clientInstance.deinit();
 
     try clientInstance.connect();
 
