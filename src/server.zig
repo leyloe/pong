@@ -27,7 +27,7 @@ pub const Server = struct {
             return ServerError.InitFailure;
         }
 
-        self.address.host = en.in6addr_any;
+        self.address.host = en.ENET_HOST_ANY;
         self.address.port = self.port;
 
         self.server = en.enet_host_create(&self.address, 1, 1, 0, 0);
