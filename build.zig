@@ -78,8 +78,6 @@ pub fn build(b: *std.Build) void {
         .root_module = exe_mod,
     });
 
-    // Deps start
-
     const raylib_dep = b.dependency("raylib_zig", .{
         .target = target,
         .optimize = optimize,
@@ -96,8 +94,6 @@ pub fn build(b: *std.Build) void {
     build_enet(b, target, optimize, exe);
 
     exe.linkLibC();
-
-    // Deps end
 
     b.installArtifact(exe);
 
