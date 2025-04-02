@@ -57,7 +57,12 @@ fn build_enet(
     exe.addIncludePath(.{ .cwd_relative = en_include_dir });
     exe.addLibraryPath(.{ .cwd_relative = en_lib_path });
 
-    exe.linkSystemLibrary("ws2_32");
+    if (target.query.os_tag != null) {
+        if (target.query.os_tag.? == .windows) {
+            exe.linkSystemLibrary("ws2_32");
+        }
+    }
+
     exe.linkSystemLibrary("enet");
 
     exe.step.dependOn(&cmake_build.step);
