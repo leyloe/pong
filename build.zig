@@ -58,7 +58,6 @@ fn build_enet(
     exe.addLibraryPath(.{ .cwd_relative = en_lib_path });
 
     exe.linkSystemLibrary("ws2_32");
-
     exe.linkSystemLibrary("enet");
 
     exe.step.dependOn(&cmake_build.step);
