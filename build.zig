@@ -13,12 +13,11 @@ fn add_enet(
 
     const en_src_path = en_dep.path("");
     const en_src = en_src_path.getPath(b);
+
     const library_src_file = b.pathJoin(&.{ en_src, "test", "library.c" });
+    const en_include_dir = b.pathJoin(&.{ en_src, "include" });
 
     exe.addCSourceFile(.{ .file = .{ .cwd_relative = library_src_file } });
-
-    const en_include_dir = b.pathJoin(&.{ en_src_path.getPath(b), "include" });
-
     exe.addIncludePath(.{ .cwd_relative = en_include_dir });
 
     if (target.query.os_tag != null) {
