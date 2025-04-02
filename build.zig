@@ -13,6 +13,10 @@ fn build_enet(
 
     const en_src_path = en_dep.path("");
 
+    const cmake_toolchain_file = b.pathFromRoot("toolchain.cmake");
+    const cmake_toolchain = b.fmt("-DCMAKE_TOOLCHAIN_FILE={s}", .{cmake_toolchain_file});
+    const cc_target = b.fmt("-DCC_TARGET={s}", .{target.result.zigTriple(b.allocator) catch @panic("Failed to get target triple")});
+
     const cmake = b.findProgram(&.{"cmake"}, &.{}) catch @panic("CMake not found");
 
     const cmake_build_type = switch (optimize) {
@@ -29,7 +33,10 @@ fn build_enet(
 
     const cmake_configure = b.addSystemCommand(&.{
         cmake,
+        cmake_toolchain,
+        cc_target,
         "-DENET_STATIC=1",
+        "-DENET_TEST=0",
         cmake_build_type,
         "-S",
         en_src_path.getPath(b),
