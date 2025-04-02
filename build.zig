@@ -1,6 +1,6 @@
 const std = @import("std");
 
-fn build_enet(
+fn add_enet(
     b: *std.Build,
     target: std.Build.ResolvedTarget,
     optimize: std.builtin.OptimizeMode,
@@ -12,60 +12,20 @@ fn build_enet(
     });
 
     const en_src_path = en_dep.path("");
+    const en_src = en_src_path.getPath(b);
+    const library_src_file = b.pathJoin(&.{ en_src, "test", "library.c" });
 
-    const cmake_toolchain_file = b.pathFromRoot("toolchain.cmake");
-    const cmake_toolchain = b.fmt("-DCMAKE_TOOLCHAIN_FILE={s}", .{cmake_toolchain_file});
-    const cc_target = b.fmt("-DCMAKE_C_COMPILER_TARGET={s}", .{target.result.zigTriple(b.allocator) catch @panic("Failed to get target triple")});
-
-    const cmake = b.findProgram(&.{"cmake"}, &.{}) catch @panic("CMake not found");
-
-    const cmake_build_type = switch (optimize) {
-        .Debug => "-DCMAKE_BUILD_TYPE=Debug",
-        .ReleaseSmall => "-DCMAKE_BUILD_TYPE=MinSizeRel",
-        else => "-DCMAKE_BUILD_TYPE=Release",
-    };
-
-    const en_build_dir = b.pathJoin(&.{ b.cache_root.path.?, switch (optimize) {
-        .Debug => "en-debug",
-        .ReleaseSmall => "en-minsizerel",
-        else => "en-release",
-    } });
-
-    const cmake_configure = b.addSystemCommand(&.{
-        cmake,
-        cmake_toolchain,
-        cc_target,
-        "-DENET_STATIC=1",
-        "-DENET_TEST=0",
-        cmake_build_type,
-        "-S",
-        en_src_path.getPath(b),
-        "-B",
-        en_build_dir,
-    });
-
-    const cmake_build = b.addSystemCommand(&.{
-        cmake,
-        "--build",
-        en_build_dir,
-    });
-    cmake_build.step.dependOn(&cmake_configure.step);
+    exe.addCSourceFile(.{ .file = .{ .cwd_relative = library_src_file } });
 
     const en_include_dir = b.pathJoin(&.{ en_src_path.getPath(b), "include" });
-    const en_lib_path = en_build_dir;
 
     exe.addIncludePath(.{ .cwd_relative = en_include_dir });
-    exe.addLibraryPath(.{ .cwd_relative = en_lib_path });
 
     if (target.query.os_tag != null) {
         if (target.query.os_tag.? == .windows) {
             exe.linkSystemLibrary("ws2_32");
         }
     }
-
-    exe.linkSystemLibrary("enet");
-
-    exe.step.dependOn(&cmake_build.step);
 }
 
 pub fn build(b: *std.Build) void {
@@ -97,7 +57,7 @@ pub fn build(b: *std.Build) void {
     exe.root_module.addImport("raylib", raylib);
     exe.root_module.addImport("raygui", raygui);
 
-    build_enet(b, target, optimize, exe);
+    add_enet(b, target, optimize, exe);
 
     exe.linkLibC();
 
