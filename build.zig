@@ -15,7 +15,7 @@ fn build_enet(
 
     const cmake_toolchain_file = b.pathFromRoot("toolchain.cmake");
     const cmake_toolchain = b.fmt("-DCMAKE_TOOLCHAIN_FILE={s}", .{cmake_toolchain_file});
-    const cc_target = b.fmt("-DCC_TARGET={s}", .{target.result.zigTriple(b.allocator) catch @panic("Failed to get target triple")});
+    const cc_target = b.fmt("-DCMAKE_C_COMPILER_TARGET={s}", .{target.result.zigTriple(b.allocator) catch @panic("Failed to get target triple")});
 
     const cmake = b.findProgram(&.{"cmake"}, &.{}) catch @panic("CMake not found");
 
