@@ -20,11 +20,8 @@ fn add_enet(
     exe.addCSourceFile(.{ .file = .{ .cwd_relative = library_src_file } });
     exe.addIncludePath(.{ .cwd_relative = en_include_dir });
 
-    if (target.query.os_tag != null) {
-        if (target.query.os_tag.? == .windows) {
-            exe.linkSystemLibrary("ws2_32");
-        }
-    }
+    if (target.query.os_tag == .windows)
+        exe.linkSystemLibrary("ws2_32");
 }
 
 pub fn build(b: *std.Build) void {
