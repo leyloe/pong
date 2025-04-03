@@ -2,12 +2,15 @@ const en = @cImport({
     @cInclude("enet.h");
 });
 
+const std = @import("std");
+
 pub const ClientError = error{
     InitFailure,
     ClientNull,
     SetHostFailure,
     PeerNull,
     ConnectionFailure,
+    PacketCreateFailure,
 };
 
 pub const Client = struct {
@@ -54,6 +57,16 @@ pub const Client = struct {
             en.enet_peer_reset(self.peer);
             return ClientError.ConnectionFailure;
         }
+    }
+
+    pub fn send(self: *Self, data: [*c]const u8) ClientError!void {
+        const packet = en.enet_packet_create(data, std.mem.len(data), en.ENET_PACKET_FLAG_RELIABLE);
+        if (packet == null) {
+            std.debug.print("Failed to create packet\n", .{});
+            return ClientError.PacketCreateFailure;
+        }
+
+        en.enet_peer_send(self.peer, 0, packet);
     }
 
     pub fn deinit(self: Self) void {
