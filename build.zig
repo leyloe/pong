@@ -38,6 +38,7 @@ pub fn build(b: *std.Build) void {
     const exe = b.addExecutable(.{
         .name = "pong",
         .root_module = exe_mod,
+        .linkage = .static,
     });
 
     const raylib_dep = b.dependency("raylib_zig", .{
