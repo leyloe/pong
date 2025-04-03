@@ -10,7 +10,7 @@ pub const ClientError = error{
     SetHostFailure,
     PeerNull,
     ConnectionFailure,
-    PacketCreateFailure,
+    PacketCreationFailure,
 };
 
 pub const Client = struct {
@@ -63,7 +63,7 @@ pub const Client = struct {
         const packet = en.enet_packet_create(data, std.mem.len(data), en.ENET_PACKET_FLAG_RELIABLE);
         if (packet == null) {
             std.debug.print("Failed to create packet\n", .{});
-            return ClientError.PacketCreateFailure;
+            return ClientError.PacketCreationFailure;
         }
 
         en.enet_peer_send(self.peer, 0, packet);
