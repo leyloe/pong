@@ -59,8 +59,8 @@ pub const Client = struct {
         }
     }
 
-    pub fn send(self: *Self, data: [*c]const u8) ClientError!void {
-        const packet = en.enet_packet_create(data, std.mem.len(data), en.ENET_PACKET_FLAG_RELIABLE);
+    pub fn send(self: *Self, data: [*c]const u8, length: usize) ClientError!void {
+        const packet = en.enet_packet_create(data, length, en.ENET_PACKET_FLAG_RELIABLE);
         if (packet == null) {
             std.debug.print("Failed to create packet\n", .{});
             return ClientError.PacketCreationFailure;
