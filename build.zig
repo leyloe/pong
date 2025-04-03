@@ -35,10 +35,14 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
+    var link_mode: std.builtin.LinkMode = .dynamic;
+    if (target.query.abi == .msvc)
+        link_mode = .static;
+
     const exe = b.addExecutable(.{
         .name = "pong",
         .root_module = exe_mod,
-        .linkage = .static,
+        .linkage = link_mode,
     });
 
     const raylib_dep = b.dependency("raylib_zig", .{
