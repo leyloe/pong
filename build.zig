@@ -35,7 +35,7 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
-    var link_mode: std.builtin.LinkMode = .dynamic;
+    var link_mode: ?std.builtin.LinkMode = null;
     if (target.query.abi == .msvc)
         link_mode = .static;
 
@@ -43,6 +43,7 @@ pub fn build(b: *std.Build) void {
         .name = "pong",
         .root_module = exe_mod,
         .linkage = link_mode,
+        .link_libc = true,
     });
 
     const raylib_dep = b.dependency("raylib_zig", .{
@@ -59,8 +60,6 @@ pub fn build(b: *std.Build) void {
     exe.root_module.addImport("raygui", raygui);
 
     add_enet(b, target, optimize, exe);
-
-    exe.linkLibC();
 
     b.installArtifact(exe);
 
