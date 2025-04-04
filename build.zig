@@ -5,7 +5,6 @@ fn add_clap(
     exe: *std.Build.Step.Compile,
 ) void {
     const s2s_dep = b.dependency("clap", .{});
-
     exe.root_module.addImport("clap", s2s_dep.module("clap"));
 }
 
@@ -14,7 +13,6 @@ fn add_s2s(
     exe: *std.Build.Step.Compile,
 ) void {
     const s2s_dep = b.dependency("s2s", .{});
-
     exe.root_module.addImport("s2s", s2s_dep.module("s2s"));
 }
 
@@ -24,12 +22,10 @@ fn add_enet(
     exe: *std.Build.Step.Compile,
 ) void {
     const en_dep = b.dependency("en", .{});
+    const en_src_path = en_dep.path("").getPath(b);
 
-    const en_src_path = en_dep.path("");
-    const en_src = en_src_path.getPath(b);
-
-    const library_src_file = b.pathJoin(&.{ en_src, "test", "library.c" });
-    const en_include_dir = b.pathJoin(&.{ en_src, "include" });
+    const library_src_file = b.pathJoin(&.{ en_src_path, "test", "library.c" });
+    const en_include_dir = b.pathJoin(&.{ en_src_path, "include" });
 
     exe.addCSourceFile(.{ .file = .{ .cwd_relative = library_src_file } });
     exe.addIncludePath(.{ .cwd_relative = en_include_dir });
@@ -43,7 +39,6 @@ fn add_raylib(
     exe: *std.Build.Step.Compile,
 ) void {
     const raylib_dep = b.dependency("raylib_zig", .{});
-
     const raylib_artifact = raylib_dep.artifact("raylib");
 
     exe.linkLibrary(raylib_artifact);
@@ -56,7 +51,6 @@ fn add_run_step(
     exe: *std.Build.Step.Compile,
 ) void {
     const run_cmd = b.addRunArtifact(exe);
-
     run_cmd.step.dependOn(b.getInstallStep());
 
     if (b.args) |args| {
@@ -99,7 +93,6 @@ fn add_exe(
     optimize: std.builtin.OptimizeMode,
 ) *std.Build.Step.Compile {
     const options = create_build_options(b, target, optimize);
-
     const exe_mod = b.createModule(options);
 
     var link_mode: ?std.builtin.LinkMode = null;
