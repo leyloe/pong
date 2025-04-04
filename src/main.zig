@@ -22,7 +22,7 @@ pub fn main() !void {
     const params = comptime clap.parseParamsComptime(
         \\-h,    --help              List of commands.
         \\-c,    --connect <str>     Connect to a game.
-        \\-h,    --host <u16>        Host a game on a specified port.
+        \\-s,    --serve <u16>       Host a game on a specified port.
     );
 
     var diag = clap.Diagnostic{};
