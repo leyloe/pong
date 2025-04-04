@@ -110,9 +110,7 @@ fn add_exe(
 
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
-
     const optimize = b.standardOptimizeOption(.{});
-
     const exe = add_exe(b, target, optimize);
 
     add_raylib(b, target, optimize, exe);
