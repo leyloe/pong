@@ -86,11 +86,11 @@ fn create_build_options(
     return options;
 }
 
-pub fn build(b: *std.Build) void {
-    const target = b.standardTargetOptions(.{});
-
-    const optimize = b.standardOptimizeOption(.{});
-
+fn add_exe(
+    b: *std.Build,
+    target: std.Build.ResolvedTarget,
+    optimize: std.builtin.OptimizeMode,
+) *std.Build.Step.Compile {
     const options = create_build_options(b, target, optimize);
 
     const exe_mod = b.createModule(options);
@@ -104,6 +104,16 @@ pub fn build(b: *std.Build) void {
         .root_module = exe_mod,
         .linkage = link_mode,
     });
+
+    return exe;
+}
+
+pub fn build(b: *std.Build) void {
+    const target = b.standardTargetOptions(.{});
+
+    const optimize = b.standardOptimizeOption(.{});
+
+    const exe = add_exe(b, target, optimize);
 
     add_raylib(b, target, optimize, exe);
     add_enet(b, target, optimize, exe);
