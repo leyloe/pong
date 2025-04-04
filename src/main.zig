@@ -15,6 +15,14 @@ pub fn singleplayer() void {
     appInstance.run();
 }
 
+pub fn connecting(address: [:0]const u8, port: u16) void {
+    _ = address;
+}
+
+pub fn serving(port: u16) void {
+    _ = port;
+}
+
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     defer _ = gpa.deinit();
@@ -53,11 +61,15 @@ pub fn main() !void {
             return clap.help(std.io.getStdErr().writer(), clap.Help, &params, .{});
         }
 
+        const port = try std.fmt.parseInt(u16, buffer.items[1], 10);
+
+        connecting(buffer.items[0], port);
+
         return;
     }
 
     if (res.args.serve) |p| {
-        std.debug.print("Server port: {}\n", .{p});
+        serving(p);
         return;
     }
 
