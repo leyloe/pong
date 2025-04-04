@@ -56,5 +56,10 @@ pub fn main() !void {
         return;
     }
 
+    if (res.args.serve) |p| {
+        std.debug.print("Server port: {}\n", .{p});
+        return;
+    }
+
     singleplayer();
 }
