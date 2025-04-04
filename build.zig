@@ -1,5 +1,19 @@
 const std = @import("std");
 
+fn add_clap(
+    b: *std.Build,
+    target: std.Build.ResolvedTarget,
+    optimize: std.builtin.OptimizeMode,
+    exe: *std.Build.Step.Compile,
+) void {
+    const s2s_dep = b.dependency("clap", .{
+        .target = target,
+        .optimize = optimize,
+    });
+
+    exe.root_module.addImport("clap", s2s_dep.module("clap"));
+}
+
 fn add_s2s(
     b: *std.Build,
     target: std.Build.ResolvedTarget,
@@ -128,6 +142,7 @@ pub fn build(b: *std.Build) void {
     add_raylib(b, target, optimize, exe);
     add_enet(b, target, optimize, exe);
     add_s2s(b, target, optimize, exe);
+    add_clap(b, target, optimize, exe);
 
     b.installArtifact(exe);
 
