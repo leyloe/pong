@@ -38,5 +38,21 @@ pub fn main() !void {
     if (res.args.help != 0)
         return clap.help(std.io.getStdErr().writer(), clap.Help, &params, .{});
 
+    if (res.args.connect) |a| {
+        var parts = std.mem.splitSequence(u8, a, ":");
+        var buffer = std.ArrayList([]const u8).init(gpa.allocator());
+
+        while (parts.next()) |part| {
+            try buffer.append(part);
+        }
+
+        std.debug.print("Connecting to {s}: {s}\n", .{ buffer.items[0], buffer.items[1] });
+
+        if (buffer.capacity != 2) {
+            std.debug.print("Invalid address format. Use <address>:<port>\n", .{});
+            return clap.help(std.io.getStdErr().writer(), clap.Help, &params, .{});
+        }
+    }
+
     singleplayer();
 }
