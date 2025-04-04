@@ -17,6 +17,7 @@ pub fn singleplayer() void {
 
 pub fn connecting(address: [:0]const u8, port: u16) void {
     _ = address;
+    _ = port;
 }
 
 pub fn serving(port: u16) void {
