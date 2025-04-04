@@ -40,8 +40,10 @@ pub fn main() !void {
 
     if (res.args.connect) |a| {
         var parts = std.mem.splitSequence(u8, a, ":");
+
         var buffer = std.ArrayList([]const u8).init(gpa.allocator());
         defer buffer.deinit();
+
         while (parts.next()) |part| {
             try buffer.append(part);
         }
