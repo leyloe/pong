@@ -20,9 +20,9 @@ pub fn main() !void {
     defer _ = gpa.deinit();
 
     const params = comptime clap.parseParamsComptime(
-        \\-h,    --help              List of commands.
-        \\-c,    --connect <str>     Connect to a game.
-        \\-s,    --serve <u16>       Host a game on a specified port.
+        \\-h,    --help              List all commands
+        \\-c,    --connect <str>     Address:Port
+        \\-s,    --serve <u16>       Port
     );
 
     var diag = clap.Diagnostic{};
