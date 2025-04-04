@@ -11,9 +11,6 @@ fn add_s2s(
         .optimize = optimize,
     });
 
-    const s2s_artifact = s2s_dep.artifact("s2s");
-
-    exe.linkLibrary(s2s_artifact);
     exe.root_module.addImport("s2s", s2s_dep.module("s2s"));
 }
 
@@ -130,6 +127,7 @@ pub fn build(b: *std.Build) void {
 
     add_raylib(b, target, optimize, exe);
     add_enet(b, target, optimize, exe);
+    add_s2s(b, target, optimize, exe);
 
     b.installArtifact(exe);
 
