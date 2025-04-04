@@ -24,28 +24,12 @@ fn add_enet(
         exe.linkSystemLibrary("ws2_32");
 }
 
-pub fn build(b: *std.Build) void {
-    const target = b.standardTargetOptions(.{});
-
-    const optimize = b.standardOptimizeOption(.{});
-
-    const exe_mod = b.createModule(.{
-        .root_source_file = b.path("src/main.zig"),
-        .target = target,
-        .optimize = optimize,
-    });
-
-    var link_mode: ?std.builtin.LinkMode = null;
-    if (target.query.abi == .msvc)
-        link_mode = .static;
-
-    const exe = b.addExecutable(.{
-        .name = "pong",
-        .root_module = exe_mod,
-        .linkage = link_mode,
-        .link_libc = true,
-    });
-
+fn add_raylib(
+    b: *std.Build,
+    target: std.Build.ResolvedTarget,
+    optimize: std.builtin.OptimizeMode,
+    exe: *std.Build.Step.Compile,
+) void {
     const raylib_dep = b.dependency("raylib_zig", .{
         .target = target,
         .optimize = optimize,
@@ -58,11 +42,12 @@ pub fn build(b: *std.Build) void {
     exe.linkLibrary(raylib_artifact);
     exe.root_module.addImport("raylib", raylib);
     exe.root_module.addImport("raygui", raygui);
+}
 
-    add_enet(b, target, optimize, exe);
-
-    b.installArtifact(exe);
-
+fn add_run_step(
+    b: *std.Build,
+    exe: *std.Build.Step.Compile,
+) void {
     const run_cmd = b.addRunArtifact(exe);
 
     run_cmd.step.dependOn(b.getInstallStep());
@@ -73,4 +58,57 @@ pub fn build(b: *std.Build) void {
 
     const run_step = b.step("run", "Run the app");
     run_step.dependOn(&run_cmd.step);
+}
+
+fn create_build_options(
+    b: *std.Build,
+    target: std.Build.ResolvedTarget,
+    optimize: std.builtin.OptimizeMode,
+) std.Build.Module.CreateOptions {
+    var options = std.Build.Module.CreateOptions{
+        .root_source_file = b.path("src/main.zig"),
+        .target = target,
+        .optimize = optimize,
+        .link_libc = true,
+    };
+
+    switch (optimize) {
+        .Debug => {},
+        .ReleaseSafe => {},
+        else => {
+            options.strip = true;
+            options.single_threaded = true;
+            options.error_tracing = false;
+            options.pic = true;
+        },
+    }
+
+    return options;
+}
+
+pub fn build(b: *std.Build) void {
+    const target = b.standardTargetOptions(.{});
+
+    const optimize = b.standardOptimizeOption(.{});
+
+    const options = create_build_options(b, target, optimize);
+
+    const exe_mod = b.createModule(options);
+
+    var link_mode: ?std.builtin.LinkMode = null;
+    if (target.query.abi == .msvc)
+        link_mode = .static;
+
+    const exe = b.addExecutable(.{
+        .name = "pong",
+        .root_module = exe_mod,
+        .linkage = link_mode,
+    });
+
+    add_raylib(b, target, optimize, exe);
+    add_enet(b, target, optimize, exe);
+
+    b.installArtifact(exe);
+
+    add_run_step(b, exe);
 }

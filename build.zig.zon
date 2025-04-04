@@ -16,6 +16,10 @@
             .url = "git+https://github.com/zpl-c/enet#90471c70234299808f5cb983c0009afbad3e71fa",
             .hash = "N-V-__8AAMLyBADa8ORhUejySKg-yOf9YnHTH7lYkC-ec5-t",
         },
+        .s2s = .{
+            .url = "git+https://github.com/ziglibs/s2s#76d7aea86c1d05afaddab9a1081b6dad68088756",
+            .hash = "s2s-0.0.1-qt8ajW97AADgZZjymAzXPnLV3sR2Fo0r4k7WGJkfftJ1",
+        },
     },
 
     .paths = .{
