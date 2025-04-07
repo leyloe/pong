@@ -1,5 +1,6 @@
 const rl = @import("raylib");
 const game = @import("game.zig");
+const net = @import("net.zig");
 
 pub const App = struct {
     const Self = @This();
@@ -11,12 +12,15 @@ pub const App = struct {
     center: rl.Vector2,
     windowTitle: [:0]const u8,
     game: game.Game,
+    server: net.Server,
+    port: u16,
 
     pub fn init(
         width: i32,
         height: i32,
         fps: i32,
         title: [:0]const u8,
+        port: u16,
     ) Self {
         const screen = rl.Vector2{
             .x = @as(f32, @floatFromInt(width)),
@@ -34,6 +38,8 @@ pub const App = struct {
             },
             .windowTitle = title,
             .game = undefined,
+            .port = port,
+            .server = undefined,
         };
 
         return self;
@@ -47,6 +53,8 @@ pub const App = struct {
     fn setup(self: *Self) void {
         self.game.app = self;
         self.game.setup();
+
+        self.server = net.Server.init(self.port);
 
         rl.initWindow(self.screenWidth, self.screenHeight, self.windowTitle);
         rl.setTargetFPS(self.targetFPS);

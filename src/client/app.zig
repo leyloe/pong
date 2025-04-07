@@ -57,8 +57,7 @@ pub const App = struct {
         self.game.app = self;
         self.game.setup();
 
-        const client = net.Client.init(self.ip, self.port);
-        self.client = client;
+        self.client = net.Client.init(self.ip, self.port);
 
         rl.initWindow(self.screenWidth, self.screenHeight, self.windowTitle);
         rl.setTargetFPS(self.targetFPS);
