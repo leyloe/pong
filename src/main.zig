@@ -1,10 +1,5 @@
 const app = @import("app.zig");
 
-const net = @import("server/net.zig");
-const en = @cImport({
-    @cInclude("enet.h");
-});
-
 const std = @import("std");
 const clap = @import("clap");
 
@@ -26,14 +21,7 @@ pub fn connecting(address: [:0]const u8, port: u16) void {
 }
 
 pub fn serving(port: u16) !void {
-    // _ = port;
-
-    var server = net.Server.init(port);
-    defer server.deinit();
-
-    var event: en.ENetEvent = undefined;
-    try server.bind();
-    _ = try server.poll(&event);
+    _ = port;
 }
 
 pub fn main() !void {
