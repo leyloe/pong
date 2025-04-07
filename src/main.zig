@@ -64,6 +64,7 @@ pub fn main() !void {
 
         const port = try std.fmt.parseInt(u16, buffer.items[1], 10);
         const address = try std.fmt.allocPrintZ(gpa.allocator(), "{s}", .{buffer.items[0]});
+        defer gpa.allocator().free(address);
 
         connecting(address, port);
 
