@@ -4,6 +4,8 @@ const ball = @import("ball.zig");
 const paddle = @import("paddle.zig");
 const score = @import("score.zig");
 const map = @import("map.zig");
+const host = @import("server/host.zig");
+const client = @import("client/client.zig");
 
 pub const Game = struct {
     const Self = @This();
@@ -14,6 +16,8 @@ pub const Game = struct {
     cpu: paddle.CpuPaddle,
     score: score.Score,
     map: map.Map,
+    host: host.Host,
+    client: client.Client,
 
     pub fn setup(self: *Self) void {
         const player_size = rl.Vector2{ .x = 25, .y = 120 };
