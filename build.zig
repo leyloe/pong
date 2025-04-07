@@ -1,5 +1,39 @@
 const std = @import("std");
 
+fn add_clap(
+    b: *std.Build,
+    exe: *std.Build.Step.Compile,
+) void {
+    const s2s_dep = b.dependency("clap", .{});
+    exe.root_module.addImport("clap", s2s_dep.module("clap"));
+}
+
+fn add_s2s(
+    b: *std.Build,
+    exe: *std.Build.Step.Compile,
+) void {
+    const s2s_dep = b.dependency("s2s", .{});
+    exe.root_module.addImport("s2s", s2s_dep.module("s2s"));
+}
+
+fn add_enet(
+    b: *std.Build,
+    target: std.Build.ResolvedTarget,
+    exe: *std.Build.Step.Compile,
+) void {
+    const en_dep = b.dependency("en", .{});
+    const en_src_path = en_dep.path("").getPath(b);
+
+    const library_src_file = b.pathJoin(&.{ en_src_path, "test", "library.c" });
+    const en_include_dir = b.pathJoin(&.{ en_src_path, "include" });
+
+    exe.addCSourceFile(.{ .file = .{ .cwd_relative = library_src_file } });
+    exe.addIncludePath(.{ .cwd_relative = en_include_dir });
+
+    if (target.query.os_tag == .windows)
+        exe.linkSystemLibrary("ws2_32");
+}
+
 fn add_raylib(
     b: *std.Build,
     exe: *std.Build.Step.Compile,
@@ -80,6 +114,9 @@ pub fn build(b: *std.Build) void {
     const exe = add_exe(b, target, optimize);
 
     add_raylib(b, exe);
+    add_enet(b, target, exe);
+    add_s2s(b, exe);
+    add_clap(b, exe);
 
     b.installArtifact(exe);
 
