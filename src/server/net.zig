@@ -43,6 +43,12 @@ pub const Server = struct {
         }
     }
 
+    pub fn poll_timeout(self: *Self, event: [*c]en.ENetEvent, timeout: u32) !void {
+        if (en.enet_host_service(self.server, event, timeout) < 0) {
+            return ServerError.PollFailure;
+        }
+    }
+
     pub fn deinit(self: Self) void {
         defer en.enet_deinitialize();
         defer en.enet_host_destroy(self.server);

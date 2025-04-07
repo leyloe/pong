@@ -2,6 +2,10 @@ const rl = @import("raylib");
 const game = @import("game.zig");
 const net = @import("net.zig");
 
+const en = @cImport({
+    @cInclude("enet.h");
+});
+
 pub const App = struct {
     const Self = @This();
 
@@ -70,13 +74,28 @@ pub const App = struct {
     }
 
     fn game_loop(self: *Self) void {
-        while (!rl.windowShouldClose()) {
-            self.update();
+        var event: en.ENetEvent = undefined;
 
-            rl.beginDrawing();
-            defer rl.endDrawing();
+        while (true) {
+            while (true) {
+                self.server.poll_timeout(&event, 1000);
 
-            self.render();
+                switch (event.type) {
+                    en.ENetEventType.ENET_EVENT_TYPE_CONNECT => {
+                        rl.log(.info, "A new client connected.");
+                    },
+                    else => {},
+                }
+            }
+
+            while (!rl.windowShouldClose()) {
+                self.update();
+
+                rl.beginDrawing();
+                defer rl.endDrawing();
+
+                self.render();
+            }
         }
     }
 
