@@ -1,6 +1,6 @@
 const rl = @import("raylib");
 const server_game = @import("server_game.zig");
-const net = @import("net.zig");
+const server_net = @import("server_net.zig");
 
 const en = @cImport({
     @cInclude("enet.h");
@@ -16,7 +16,7 @@ pub const App = struct {
     center: rl.Vector2,
     windowTitle: [:0]const u8,
     game: server_game.Game,
-    server: net.Server,
+    server: server_net.Server,
     port: u16,
 
     pub fn init(
@@ -58,7 +58,7 @@ pub const App = struct {
         self.game.app = self;
         self.game.setup();
 
-        self.server = net.Server.init(self.port);
+        self.server = server_net.Server.init(self.port);
 
         rl.initWindow(self.screenWidth, self.screenHeight, self.windowTitle);
         rl.setTargetFPS(self.targetFPS);
