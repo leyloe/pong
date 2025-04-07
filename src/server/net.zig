@@ -5,6 +5,7 @@ const en = @cImport({
 pub const ServerError = error{
     InitFailure,
     ServerNull,
+    PollFailure,
 };
 
 pub const Server = struct {
@@ -33,6 +34,12 @@ pub const Server = struct {
         self.server = en.enet_host_create(&self.address, 1, 1, 0, 0);
         if (self.server == null) {
             return ServerError.ServerNull;
+        }
+    }
+
+    pub fn poll(self: *Self, event: [*c]en.ENetEvent) !void {
+        if (en.enet_host_service(self.server, event, 0) < 0) {
+            return ServerError.PollFailure;
         }
     }
 
