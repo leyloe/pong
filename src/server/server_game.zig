@@ -1,5 +1,5 @@
 const rl = @import("raylib");
-const app = @import("app.zig");
+const server_app = @import("server_app.zig");
 const ball = @import("../ball.zig");
 const paddle = @import("../paddle.zig");
 const score = @import("../score.zig");
@@ -8,7 +8,7 @@ const map = @import("../map.zig");
 pub const Game = struct {
     const Self = @This();
 
-    app: *const app.App,
+    app: *const server_app.App,
     ball: ball.Ball,
     player: paddle.Paddle,
     cpu: paddle.CpuPaddle,

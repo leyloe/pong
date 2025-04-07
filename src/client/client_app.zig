@@ -1,6 +1,6 @@
 const rl = @import("raylib");
-const game = @import("game.zig");
-const net = @import("net.zig");
+const game = @import("server_game.zig");
+const client_net = @import("client_net.zig");
 
 pub const App = struct {
     const Self = @This();
@@ -12,7 +12,7 @@ pub const App = struct {
     center: rl.Vector2,
     windowTitle: [:0]const u8,
     game: game.Game,
-    client: net.Client,
+    client: client_net.Client,
     ip: [*c]const u8,
     port: u16,
 
@@ -57,7 +57,7 @@ pub const App = struct {
         self.game.app = self;
         self.game.setup();
 
-        self.client = net.Client.init(self.ip, self.port);
+        self.client = client_net.Client.init(self.ip, self.port);
 
         rl.initWindow(self.screenWidth, self.screenHeight, self.windowTitle);
         rl.setTargetFPS(self.targetFPS);

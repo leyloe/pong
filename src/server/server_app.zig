@@ -1,5 +1,5 @@
 const rl = @import("raylib");
-const game = @import("game.zig");
+const server_game = @import("server_game.zig");
 const net = @import("net.zig");
 
 const en = @cImport({
@@ -15,7 +15,7 @@ pub const App = struct {
     screen: rl.Vector2,
     center: rl.Vector2,
     windowTitle: [:0]const u8,
-    game: game.Game,
+    game: server_game.Game,
     server: net.Server,
     port: u16,
 
@@ -79,10 +79,11 @@ pub const App = struct {
         while (true) {
             while (true) {
                 self.server.poll_timeout(&event, 1000);
+                rl.traceLog(.info, "Polling for events...", .{});
 
                 switch (event.type) {
                     en.ENetEventType.ENET_EVENT_TYPE_CONNECT => {
-                        rl.log(.info, "A new client connected.");
+                        rl.traceLog(.info, "A new client connected.", .{});
                     },
                     else => {},
                 }

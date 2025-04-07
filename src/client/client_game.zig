@@ -1,5 +1,5 @@
 const rl = @import("raylib");
-const app = @import("app.zig");
+const app = @import("client_app.zig");
 const ball = @import("../ball.zig");
 const paddle = @import("../paddle.zig");
 const score = @import("../score.zig");

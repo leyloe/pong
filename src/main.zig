@@ -1,4 +1,5 @@
 const app = @import("app.zig");
+const server_app = @import("server/server_app.zig");
 
 const std = @import("std");
 const clap = @import("clap");
@@ -21,7 +22,10 @@ pub fn connecting(address: [:0]const u8, port: u16) void {
 }
 
 pub fn serving(port: u16) !void {
-    _ = port;
+    var appInstance = server_app.App.init(screenWidth, screenHeight, targetFPS, windowTitle, port);
+    defer appInstance.deinit();
+
+    appInstance.run();
 }
 
 pub fn main() !void {
