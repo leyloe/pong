@@ -1,6 +1,6 @@
 const game = @import("game.zig");
 
-pub const App = union(enum) {
+pub const App = struct {
     const Self = @This();
 
     init: fn (g: game.Game) Self,
