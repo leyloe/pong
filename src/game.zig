@@ -1,4 +1,4 @@
-pub const Game = union(enum) {
+pub const Game = struct {
     const Self = @This();
 
     init: fn () Self,
