@@ -1,12 +1,36 @@
+const std = @import("std");
+
+pub const GameInterface = union(enum) {
+    const Self = @This();
+
+    game: Game,
+
+    pub fn draw(self: Self) void {
+        switch (self) {
+            inline else => |s| s.draw(),
+        }
+    }
+    pub fn update(self: Self) void {
+        switch (self) {
+            inline else => |s| s.update(),
+        }
+    }
+};
+
 pub const Game = struct {
     const Self = @This();
 
-    ptr: *anyopaque,
-    vtable: *const VTable,
+    pub fn init() Self {
+        return Self{};
+    }
 
-    const VTable = struct {
-        init: *const fn (*anyopaque) *anyopaque,
-        draw: *const fn (*anyopaque) void,
-        update: *const fn (*anyopaque) void,
-    };
+    pub fn draw(self: Self) void {
+        _ = self;
+        std.debug.print("I'm drawing...\n", .{});
+    }
+
+    pub fn update(self: Self) void {
+        _ = self;
+        std.debug.print("I'm updating...\n", .{});
+    }
 };
