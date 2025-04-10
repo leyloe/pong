@@ -13,8 +13,8 @@ pub const HostPacket = union(enum) {
         try s2s.serialize(stream, Self, self);
     }
 
-    pub fn deserialize(self: *Self, stream: anytype) !void {
-        try s2s.deserialize(stream, Self, self);
+    pub fn deserialize(stream: anytype) !Self {
+        return try s2s.deserialize(stream, Self);
     }
 };
 
