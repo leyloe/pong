@@ -7,10 +7,19 @@ const Paddle = @import("Paddle.zig");
 const Score = @import("Score.zig");
 const NetClient = @import("NetClient.zig");
 
-const GameMode = enum {
+const Port = struct {
+    port: u16,
+};
+
+const Address = struct {
+    ip: [:0]const u8,
+    port: u16,
+};
+
+const AppMode = union(enum) {
     Singleplayer,
-    Host,
-    Client,
+    Host: Port,
+    Client: Address,
 };
 
 const screenWidth = 1280;
@@ -31,7 +40,7 @@ const center = rl.Vector2{
 const player_size = rl.Vector2{ .x = 25, .y = 120 };
 const player_position = rl.Vector2{ .x = screen.x - player_size.x - 10, .y = center.y - player_size.y / 2 };
 
-fn parse_connect_arg(arg: []const u8, allocator: std.mem.Allocator) !struct { ip: [:0]const u8, port: u16 } {
+fn parse_connect_arg(arg: []const u8, allocator: std.mem.Allocator) !Address {
     var parts = std.mem.splitSequence(u8, arg, ":");
 
     var buffer = std.ArrayList([]const u8).init(allocator);
@@ -60,6 +69,8 @@ pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     defer _ = gpa.deinit();
 
+    var app_mode: AppMode = .Singleplayer;
+
     const params = comptime clap.parseParamsComptime(
         \\-h,    --help                   List all commands
         \\-c,    --connect <str>    Address:Port
@@ -80,12 +91,12 @@ pub fn main() !void {
         return clap.help(std.io.getStdErr().writer(), clap.Help, &params, .{});
 
     if (res.args.connect) |arg| {
-        const connect = parse_connect_arg(arg, gpa.allocator()) catch |err| {
+        const addr = parse_connect_arg(arg, gpa.allocator()) catch |err| {
             std.debug.print("Invalid address format, run with --help for more information\n", .{});
             return err;
         };
 
-        try connect_to_host(connect.ip, connect.port);
+        app_mode = .{ .Client = addr };
     }
 
     _ = Ball.init(center, 7, 20);
@@ -96,4 +107,12 @@ pub fn main() !void {
     defer rl.closeWindow();
 
     rl.setTargetFPS(targetFPS);
+
+    switch (app_mode) {
+        .Host => {},
+        .Client => |client| {
+            try connect_to_host(client.ip, client.port);
+        },
+        .Singleplayer => {},
+    }
 }

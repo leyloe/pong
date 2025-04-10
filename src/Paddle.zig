@@ -36,7 +36,7 @@ pub fn update(self: *Self, ball: *Ball) void {
     switch (self.mode) {
         Mode.Player => self.update_player(ball),
         Mode.Cpu => self.update_cpu(ball),
-        _ => {},
+        Mode.Peer => {},
     }
 
     self.limit_movement();
