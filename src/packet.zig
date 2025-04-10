@@ -7,7 +7,7 @@ pub const HostPacket = union(enum) {
     const Self = @This();
 
     Positions: Positions,
-    Score: Score,
+    Score: ?Score,
 
     pub fn serialize(self: *Self, stream: anytype) !void {
         try s2s.serialize(stream, Self, self);
