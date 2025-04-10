@@ -70,10 +70,6 @@ pub fn poll_timeout(self: *Self, event: [*c]en.ENetEvent, timeout: u32) !void {
     }
 }
 
-pub fn create_event() [*c]en.ENetEvent {
-    return undefined;
-}
-
 pub fn deinit(self: Self) void {
     defer en.enet_deinitialize();
     defer en.enet_host_destroy(self.host);
