@@ -9,7 +9,7 @@ pub const HostPacket = union(enum) {
     Positions: Positions,
     Score: Score,
 
-    pub fn serialize(self: Self, stream: anytype) !void {
+    pub fn serialize(self: *Self, stream: anytype) !void {
         try s2s.serialize(stream, Self, self);
     }
 
