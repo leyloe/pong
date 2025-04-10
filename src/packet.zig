@@ -18,7 +18,19 @@ pub const HostPacket = union(enum) {
     }
 };
 
-pub const ClientPacket = Positions;
+pub const ClientPacket = union(enum) {
+    const Self = @This();
+
+    Positions: Positions,
+
+    pub fn serialize(self: *Self, stream: anytype) !void {
+        try s2s.serialize(stream, Self, self);
+    }
+
+    pub fn deserialize(self: *Self, stream: anytype) !void {
+        try s2s.deserialize(stream, Self, self);
+    }
+};
 
 pub const Positions = struct {
     paddle: ?rl.Vector2,
