@@ -110,8 +110,7 @@ pub fn connect_to_host(ip: [:0]const u8, port: u16) !void {
             .paddle_y = player.position.y,
         };
         try obj.serialize(buffer.writer());
-        const client_packet = try std.fmt.allocPrintZ(std.heap.page_allocator, "{s}", .{buffer.items});
-        try client.send(client_packet, client_packet.len);
+        try client.send(buffer.items.ptr, buffer.items.len);
 
         rl.beginDrawing();
         defer rl.endDrawing();
@@ -189,8 +188,7 @@ pub fn create_host(port: u16) !void {
             .score = score,
         };
         try obj.serialize(buffer.writer());
-        const server_packet = try std.fmt.allocPrintZ(std.heap.page_allocator, "{s}", .{buffer.items});
-        try server.send(client_peer, server_packet, server_packet.len);
+        try server.send(client_peer, buffer.items.ptr, buffer.items.len);
 
         rl.beginDrawing();
         defer rl.endDrawing();

@@ -45,7 +45,7 @@ pub fn poll_timeout(self: *Self, event: [*c]en.ENetEvent, timeout: u32) !void {
     }
 }
 
-pub fn send(_: *Self, peer: [*c]en.ENetPeer, data: [*c]const u8, length: usize) ServerError!void {
+pub fn send(_: *Self, peer: [*c]en.ENetPeer, data: ?*const anyopaque, length: usize) ServerError!void {
     const packet = en.enet_packet_create(data, length, en.ENET_PACKET_FLAG_RELIABLE);
     defer en.enet_packet_destroy(packet);
     if (packet == null) {

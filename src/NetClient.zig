@@ -50,7 +50,7 @@ pub fn init(ip: [*c]const u8, port: u16) ClientError!Self {
     return self;
 }
 
-pub fn send(self: *Self, data: [*c]const u8, length: usize) ClientError!void {
+pub fn send(self: *Self, data: ?*const anyopaque, length: usize) ClientError!void {
     const packet = en.enet_packet_create(data, length, en.ENET_PACKET_FLAG_RELIABLE);
     defer en.enet_packet_destroy(packet);
     if (packet == null) {
