@@ -32,14 +32,14 @@ pub fn draw(self: *Self) void {
     rl.drawRectangleV(self.position, self.size, .white);
 }
 
-pub fn update(self: *Self, ball: *Ball) void {
+pub fn update(self: *Self, ball: *Ball, screen: *const rl.Vector2) void {
     switch (self.mode) {
-        Mode.Player => self.update_player(ball),
+        Mode.Player => self.update_player(),
         Mode.Cpu => self.update_cpu(ball),
         Mode.Peer => {},
     }
 
-    self.limit_movement();
+    self.limit_movement(screen);
     self.handle_collision(ball);
 }
 
@@ -59,12 +59,12 @@ fn update_cpu(self: *Self, ball: *Ball) void {
         self.position.y += self.speed;
 }
 
-fn limit_movement(self: *Self) void {
+fn limit_movement(self: *Self, screen: *const rl.Vector2) void {
     if (self.position.y <= 0)
         self.position.y = 0;
 
-    if (self.position.y + self.size.y >= self.app.screen.y)
-        self.position.y = self.app.screen.y - self.size.y;
+    if (self.position.y + self.size.y >= screen.y)
+        self.position.y = screen.y - self.size.y;
 }
 
 fn handle_collision(self: *Self, ball: *Ball) void {

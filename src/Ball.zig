@@ -23,7 +23,7 @@ pub fn draw(self: *Self) void {
     rl.drawCircleV(self.position, self.radius, .white);
 }
 
-pub fn update(self: *Self, screen: *const rl.Vector2, score: *Score) void {
+pub fn update(self: *Self, screen: *const rl.Vector2, center: *const rl.Vector2, score: *Score) void {
     self.position = self.position.add(self.speed);
 
     if ((self.position.y + self.radius >= screen.y) or (self.position.y - self.radius <= 0))
@@ -31,17 +31,17 @@ pub fn update(self: *Self, screen: *const rl.Vector2, score: *Score) void {
 
     if (self.position.x + self.radius >= screen.x) {
         score.opponent += 1;
-        self.reset_ball();
+        self.reset_ball(center);
     }
 
     if (self.position.x - self.radius <= 0) {
         score.player += 1;
-        self.reset_ball();
+        self.reset_ball(center);
     }
 }
 
-fn reset_ball(self: *Self, center_pos: rl.Vector2) void {
-    self.position = center_pos;
+fn reset_ball(self: *Self, center_pos: *const rl.Vector2) void {
+    self.position = center_pos.*;
 
     const speed_choices = [_]f32{ -1, 1 };
     self.speed.x *= speed_choices[@intCast(rl.getRandomValue(0, 1))];

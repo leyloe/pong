@@ -9,6 +9,7 @@ pub const ClientError = error{
     PeerNull,
     ConnectionFailure,
     PacketCreationFailure,
+    PacketSendFailure,
     PollFailure,
 };
 
@@ -51,11 +52,14 @@ pub fn init(ip: [*c]const u8, port: u16) ClientError!Self {
 
 pub fn send(self: *Self, data: [*c]const u8, length: usize) ClientError!void {
     const packet = en.enet_packet_create(data, length, en.ENET_PACKET_FLAG_RELIABLE);
+    defer en.enet_packet_destroy(packet);
     if (packet == null) {
         return ClientError.PacketCreationFailure;
     }
 
-    en.enet_peer_send(self.peer, 0, packet);
+    if (en.enet_peer_send(self.peer, 0, packet) < 0) {
+        return ClientError.PacketSendFailure;
+    }
 }
 
 pub fn poll(self: *Self, event: [*c]en.ENetEvent) !void {
