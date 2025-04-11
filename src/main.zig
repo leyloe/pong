@@ -62,7 +62,7 @@ fn parse_connect_arg(arg: []const u8, allocator: std.mem.Allocator) !Address {
     return .{ .ip = address, .port = port };
 }
 
-pub fn connect_to_host(ip: [:0]const u8, port: u16) !void {
+pub fn connect_to_host(ip: [:0]const u8, port: u16, allocator: std.mem.Allocator) !void {
     var client = try NetClient.init(ip, port);
     defer client.deinit();
 
@@ -79,29 +79,32 @@ pub fn connect_to_host(ip: [:0]const u8, port: u16) !void {
 
     rl.setTargetFPS(targetFPS);
 
-    var buffer = std.ArrayList(u8).init(std.heap.page_allocator);
+    var buffer = std.ArrayList(u8).init(allocator);
+    defer buffer.deinit();
 
     while (!rl.windowShouldClose()) {
         defer buffer.clearRetainingCapacity();
 
         // receive the server packet
         var event: en.ENetEvent = undefined;
-        try client.poll(&event);
-        switch (event.type) {
-            en.ENET_EVENT_TYPE_RECEIVE => {
-                const slice = std.mem.span(event.packet.*.data);
-                std.debug.assert(slice.len == event.packet.*.dataLength);
+        const has_event = try client.poll(&event);
+        if (has_event) {
+            switch (event.type) {
+                en.ENET_EVENT_TYPE_RECEIVE => {
+                    const slice: []const u8 = @as([]const u8, event.packet.*.data[0..event.packet.*.dataLength]);
+                    std.debug.assert(slice.len == event.packet.*.dataLength);
 
-                var stream = std.io.fixedBufferStream(slice);
-                const server_packet = try packet.HostPacket.deserialize(stream.reader());
+                    var stream = std.io.fixedBufferStream(slice);
+                    const server_packet = try packet.HostPacket.deserialize(stream.reader());
 
-                peer.position.y = server_packet.positions.paddle_y;
-                ball.position = server_packet.positions.ball;
-                score = server_packet.score;
+                    peer.position.y = server_packet.positions.paddle_y;
+                    ball.position = server_packet.positions.ball;
+                    score = server_packet.score;
 
-                en.enet_packet_destroy(event.packet);
-            },
-            else => {},
+                    en.enet_packet_destroy(event.packet);
+                },
+                else => {},
+            }
         }
 
         player.update(&ball, &screen);
@@ -125,14 +128,18 @@ pub fn connect_to_host(ip: [:0]const u8, port: u16) !void {
     }
 }
 
-pub fn create_host(port: u16) !void {
+pub fn create_host(port: u16, allocator: std.mem.Allocator) !void {
     var server = try NetServer.init(port);
     defer server.deinit();
 
     var client_peer: [*c]en.ENetPeer = undefined;
     while (true) {
         var event: en.ENetEvent = undefined;
-        try server.poll_timeout(&event, 1000);
+        const has_event = try server.poll_timeout(&event, 1000);
+
+        if (!has_event) {
+            continue;
+        }
 
         switch (event.type) {
             en.ENET_EVENT_TYPE_CONNECT => {
@@ -156,27 +163,30 @@ pub fn create_host(port: u16) !void {
 
     rl.setTargetFPS(targetFPS);
 
-    var buffer = std.ArrayList(u8).init(std.heap.page_allocator);
+    var buffer = std.ArrayList(u8).init(allocator);
+    defer buffer.deinit();
 
     while (!rl.windowShouldClose()) {
         defer buffer.clearRetainingCapacity();
 
         // receive the client packet
         var event: en.ENetEvent = undefined;
-        try server.poll(&event);
-        switch (event.type) {
-            en.ENET_EVENT_TYPE_RECEIVE => {
-                const slice = std.mem.span(event.packet.*.data);
-                std.debug.assert(slice.len == event.packet.*.dataLength);
+        const has_event = try server.poll(&event);
+        if (has_event) {
+            switch (event.type) {
+                en.ENET_EVENT_TYPE_RECEIVE => {
+                    const slice: []const u8 = @as([]const u8, event.packet.*.data[0..event.packet.*.dataLength]);
+                    std.debug.assert(slice.len == event.packet.*.dataLength);
 
-                var stream = std.io.fixedBufferStream(slice);
-                const client_packet = try packet.ClientPacket.deserialize(stream.reader());
+                    var stream = std.io.fixedBufferStream(slice);
+                    const client_packet = try packet.ClientPacket.deserialize(stream.reader());
 
-                peer.position.y = client_packet.paddle_y;
+                    peer.position.y = client_packet.paddle_y;
 
-                en.enet_packet_destroy(event.packet);
-            },
-            else => {},
+                    en.enet_packet_destroy(event.packet);
+                },
+                else => {},
+            }
         }
 
         ball.update(&screen, &center, &score);
@@ -274,10 +284,10 @@ pub fn main() !void {
 
     switch (app_mode) {
         .Host => |port| {
-            try create_host(port);
+            try create_host(port, gpa.allocator());
         },
         .Client => |client| {
-            try connect_to_host(client.ip, client.port);
+            try connect_to_host(client.ip, client.port, gpa.allocator());
         },
         .Singleplayer => {
             singleplayer();

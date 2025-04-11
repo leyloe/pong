@@ -62,16 +62,14 @@ pub fn send(self: *Self, data: ?*const anyopaque, length: usize) ClientError!voi
     }
 }
 
-pub fn poll(self: *Self, event: [*c]en.ENetEvent) !void {
-    if (en.enet_host_service(self.host, event, 0) < 0) {
-        return ClientError.PollFailure;
-    }
+pub fn poll(self: *Self, event: [*c]en.ENetEvent) !bool {
+    return self.poll_timeout(event, 0);
 }
 
-pub fn poll_timeout(self: *Self, event: [*c]en.ENetEvent, timeout: u32) !void {
-    if (en.enet_host_service(self.host, event, timeout) < 0) {
-        return ClientError.PollFailure;
-    }
+pub fn poll_timeout(self: *Self, event: [*c]en.ENetEvent, timeout: u32) !bool {
+    const ret = en.enet_host_service(self.host, event, timeout);
+    if (ret < 0) return ClientError.PollFailure;
+    return ret > 0;
 }
 
 pub fn deinit(self: Self) void {
