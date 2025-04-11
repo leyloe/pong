@@ -89,7 +89,7 @@ pub fn connect_to_host(ip: [:0]const u8, port: u16) !void {
         try client.poll(&event);
         switch (event.type) {
             en.ENET_EVENT_TYPE_RECEIVE => {
-                const slice = event.packet.*.data[0..event.packet.*.dataLength];
+                const slice = std.mem.span(event.packet.*.data);
                 std.debug.assert(slice.len == event.packet.*.dataLength);
 
                 var stream = std.io.fixedBufferStream(slice);
@@ -166,7 +166,7 @@ pub fn create_host(port: u16) !void {
         try server.poll(&event);
         switch (event.type) {
             en.ENET_EVENT_TYPE_RECEIVE => {
-                const slice = event.packet.*.data[0..event.packet.*.dataLength];
+                const slice = std.mem.span(event.packet.*.data);
                 std.debug.assert(slice.len == event.packet.*.dataLength);
 
                 var stream = std.io.fixedBufferStream(slice);
