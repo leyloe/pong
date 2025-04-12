@@ -1,12 +1,12 @@
 const std = @import("std");
-const network = @import("network");
+const Socket = @import("Socket.zig");
 const s2s = @import("s2s");
 
 const Self = @This();
 
-socket: network.Socket,
+socket: Socket,
 
-pub fn init(socket: network.Socket) Self {
+pub fn init(socket: Socket) Self {
     return Self{
         .socket = socket,
     };
@@ -23,7 +23,7 @@ pub fn writePacket(self: *Self, allocator: std.mem.Allocator, buffer: []const u8
     try buf.appendSlice(len_bytes[0..4]);
     try buf.appendSlice(buffer[0..buffer.len]);
 
-    _ = try self.socket.writer().write(buf.items);
+    _ = try self.socket.write(buf.items);
 }
 
 pub fn readPacket(self: *Self, allocator: std.mem.Allocator) !std.ArrayList(u8) {
@@ -31,10 +31,10 @@ pub fn readPacket(self: *Self, allocator: std.mem.Allocator) !std.ArrayList(u8) 
 
     var len: [4]u8 = undefined;
 
-    _ = try self.socket.reader().read(len[0..4]);
+    _ = try self.socket.read(len[0..4]);
     const packet_len = std.mem.readInt(u32, &len, .big);
 
-    _ = try self.socket.reader().read(buf.items[0..packet_len]);
+    _ = try self.socket.read(buf.items[0..packet_len]);
 
     return buf;
 }

@@ -4,7 +4,7 @@ const Ball = @import("Ball.zig");
 const Paddle = @import("Paddle.zig");
 const Score = @import("Score.zig");
 const packet = @import("packet.zig");
-const network = @import("network");
+const Socket = @import("Socket.zig");
 const Frame = @import("Frame.zig");
 
 pub fn connect_to_host(
@@ -19,13 +19,11 @@ pub fn connect_to_host(
     windowTitle: [:0]const u8,
     targetFPS: i32,
 ) !void {
-    try network.init();
-    defer network.deinit();
+    const addr = try std.net.Address.parseIp(ip, port);
+    var sock = try Socket.init(addr);
+    defer sock.deinit();
 
-    var sock = try network.connectToHost(std.heap.page_allocator, ip, port, .udp);
-    defer sock.close();
-
-    // try sock.setTimeouts(0, 0);
+    try sock.connect();
 
     var frame = Frame.init(sock);
 
@@ -85,19 +83,11 @@ pub fn create_host(
     windowTitle: [:0]const u8,
     targetFPS: i32,
 ) !void {
-    try network.init();
-    defer network.deinit();
+    const addr = try std.net.Address.parseIp("0.0.0.0", port);
+    var sock = try Socket.init(addr);
+    defer sock.deinit();
 
-    var sock = try network.Socket.create(.ipv4, .udp);
-    defer sock.close();
-
-    try sock.bind(.{
-        .address = .{ .ipv4 = network.Address.IPv4.any },
-        .port = port,
-    });
-    defer sock.close();
-
-    // try sock.setTimeouts(0, 0);
+    try sock.bind();
 
     var frame = Frame.init(sock);
 

@@ -16,13 +16,13 @@
             .url = "git+https://github.com/Hejsil/zig-clap#a4e784da8399c51d5eeb5783e6a485b960d5c1f9",
             .hash = "clap-0.10.0-oBajB8fkAQB0JvsrWLar4YZrseSZ9irFxHB7Hvy_bvxb",
         },
-        .network = .{
-            .url = "git+https://github.com/ikskuh/zig-network#c76240d2240711a3dcbf1c0fb461d5d1f18be79a",
-            .hash = "network-0.1.0-AAAAAOwlAQAQ6zKPUrsibdpGisxld9ftUKGdMvcCSpaj",
-        },
         .s2s = .{
             .url = "git+https://github.com/ziglibs/s2s#76d7aea86c1d05afaddab9a1081b6dad68088756",
             .hash = "s2s-0.0.1-qt8ajW97AADgZZjymAzXPnLV3sR2Fo0r4k7WGJkfftJ1",
+        },
+        .gns = .{
+            .url = "git+https://github.com/ValveSoftware/GameNetworkingSockets#725e273c7442bac7a8bc903c0b210b1c15c34d92",
+            .hash = "N-V-__8AAG9PagEDvfLffNQdvABbEQ0nfQVDvBBmzz0_a8bu",
         },
     },
 

@@ -8,14 +8,6 @@ fn add_clap(
     exe.root_module.addImport("clap", s2s_dep.module("clap"));
 }
 
-fn add_network(
-    b: *std.Build,
-    exe: *std.Build.Step.Compile,
-) void {
-    const network_dep = b.dependency("network", .{});
-    exe.root_module.addImport("network", network_dep.module("network"));
-}
-
 fn add_s2s(
     b: *std.Build,
     exe: *std.Build.Step.Compile,
@@ -104,7 +96,6 @@ pub fn build(b: *std.Build) void {
     const exe = add_exe(b, target, optimize);
 
     add_raylib(b, exe);
-    add_network(b, exe);
     add_s2s(b, exe);
     add_clap(b, exe);
 
