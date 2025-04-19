@@ -4,8 +4,7 @@ const Ball = @import("Ball.zig");
 const Paddle = @import("Paddle.zig");
 const Score = @import("Score.zig");
 const packet = @import("packet.zig");
-const Socket = @import("Socket.zig");
-const Frame = @import("Frame.zig");
+const zimq = @import("zimq");
 
 pub fn connect_to_host(
     ip: []const u8,
@@ -138,3 +137,5 @@ pub fn create_host(
         score.draw(screenWidth);
     }
 }
+
+pub fn client_loop() void {}

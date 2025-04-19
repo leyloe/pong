@@ -20,9 +20,9 @@
             .url = "git+https://github.com/ziglibs/s2s#76d7aea86c1d05afaddab9a1081b6dad68088756",
             .hash = "s2s-0.0.1-qt8ajW97AADgZZjymAzXPnLV3sR2Fo0r4k7WGJkfftJ1",
         },
-        .gns = .{
-            .url = "git+https://github.com/ValveSoftware/GameNetworkingSockets#725e273c7442bac7a8bc903c0b210b1c15c34d92",
-            .hash = "N-V-__8AAG9PagEDvfLffNQdvABbEQ0nfQVDvBBmzz0_a8bu",
+        .zimq = .{
+            .url = "git+https://github.com/uyha/zimq.git#f82a9daeb92dc0b46257a7a187a6ac04d7cc0ab1",
+            .hash = "zimq-0.0.0-nw1ioNB1AQDqwOzxuUN1_0IKZNF0Mwe2CKFGax_zY4VG",
         },
     },
 
