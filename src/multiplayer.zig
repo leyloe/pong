@@ -18,13 +18,21 @@ pub fn connect_to_host(
     windowTitle: [:0]const u8,
     targetFPS: i32,
 ) !void {
-    const addr = try std.net.Address.parseIp(ip, port);
-    var sock = try Socket.init(addr);
-    defer sock.deinit();
+    var packets = std.ArrayList(packet.HostPacket).init(std.heap.page_allocator);
+    defer packets.deinit();
 
-    try sock.connect();
+    var mutex = std.Thread.Mutex{};
 
-    var frame = Frame.init(sock);
+    var context = try zimq.Context.init();
+    defer context.deinit();
+
+    var socket = try zimq.Socket.init(context, .push);
+    defer socket.deinit();
+
+    const addr = try std.fmt.allocPrintZ(std.heap.page_allocator, "udp://{s}:{d}", .{ ip, port });
+    try socket.connect(addr);
+
+    try client_loop(socket, &packets, &mutex);
 
     const peer_size = player_size;
     const peer_position = rl.Vector2{ .x = 10, .y = screen.y / 2 - peer_size.y - 2 };
@@ -46,19 +54,27 @@ pub fn connect_to_host(
         defer buffer.clearRetainingCapacity();
 
         // receive the server packet
-        const server_packet = try frame.readDeserialize(packet.HostPacket, std.heap.page_allocator);
-        ball.position = server_packet.positions.ball;
-        peer.position.y = server_packet.positions.paddle_y;
-        score = server_packet.score;
+        if (mutex.tryLock()) {
+            defer mutex.unlock();
+
+            const msg = packets.pop();
+
+            if (msg) |host_packet| {
+                ball.position = host_packet.positions.ball;
+                peer.position.y = host_packet.positions.paddle_y;
+                score = host_packet.score;
+            }
+        }
 
         player.update(&ball, &screen);
         peer.update(&ball, &screen);
 
         // send the client packet
-        const client_packet = packet.ClientPacket{
+        var client_packet = packet.ClientPacket{
             .paddle_y = player.position.y,
         };
-        try frame.writeSerialize(packet.ClientPacket, client_packet, std.heap.page_allocator);
+        try client_packet.serialize(buffer.writer());
+        try socket.sendSlice(buffer.items, .{});
 
         rl.beginDrawing();
         defer rl.endDrawing();
@@ -82,13 +98,21 @@ pub fn create_host(
     windowTitle: [:0]const u8,
     targetFPS: i32,
 ) !void {
-    const addr = try std.net.Address.parseIp("0.0.0.0", port);
-    var sock = try Socket.init(addr);
-    defer sock.deinit();
+    var packets = std.ArrayList(packet.ClientPacket).init(std.heap.page_allocator);
+    defer packets.deinit();
 
-    try sock.bind();
+    var mutex = std.Thread.Mutex{};
 
-    var frame = Frame.init(sock);
+    var context = try zimq.Context.init();
+    defer context.deinit();
+
+    var socket = try zimq.Socket.init(context, .push);
+    defer socket.deinit();
+
+    const addr = try std.fmt.allocPrintZ(std.heap.page_allocator, "udp://0.0.0.0:{d}", .{port});
+    try socket.bind(addr);
+
+    try server_loop(socket, &packets, &mutex);
 
     const peer_size = player_size;
     const peer_position = rl.Vector2{ .x = 10, .y = screen.y / 2 - peer_size.y - 2 };
@@ -110,22 +134,30 @@ pub fn create_host(
         defer buffer.clearRetainingCapacity();
 
         // receive the client packet
-        const client_packet = try frame.readDeserialize(packet.ClientPacket, std.heap.page_allocator);
-        peer.position.y = client_packet.paddle_y;
+        if (mutex.tryLock()) {
+            defer mutex.unlock();
+
+            const msg = packets.pop();
+
+            if (msg) |client_packet| {
+                peer.position.y = client_packet.paddle_y;
+            }
+        }
 
         ball.update(&screen, &center, &score);
         player.update(&ball, &screen);
         peer.update(&ball, &screen);
 
         // send the server packet
-        const server_packet = packet.HostPacket{
+        var server_packet = packet.HostPacket{
             .positions = packet.Positions{
                 .paddle_y = player.position.y,
                 .ball = ball.position,
             },
             .score = score,
         };
-        try frame.writeSerialize(packet.HostPacket, server_packet, std.heap.page_allocator);
+        try server_packet.serialize(buffer.writer());
+        try socket.sendSlice(buffer.items, .{});
 
         rl.beginDrawing();
         defer rl.endDrawing();
@@ -138,4 +170,54 @@ pub fn create_host(
     }
 }
 
-pub fn client_loop() void {}
+pub fn client_loop(
+    socket: *zimq.Socket,
+    packets: *std.ArrayList(packet.HostPacket),
+    mutex: *std.Thread.Mutex,
+) !void {
+    while (true) {
+        var buffer = zimq.Message.empty();
+        defer buffer.deinit();
+        _ = try socket.recvMsg(&buffer, .{});
+
+        if (buffer.slice() == null) {
+            continue;
+        }
+
+        var stream = std.io.fixedBufferStream(buffer.slice().?);
+        const host_packet = packet.HostPacket.deserialize(stream.reader()) catch {
+            continue;
+        };
+
+        mutex.lock();
+        defer mutex.unlock();
+
+        try packets.append(host_packet);
+    }
+}
+
+pub fn server_loop(
+    socket: *zimq.Socket,
+    packets: *std.ArrayList(packet.ClientPacket),
+    mutex: *std.Thread.Mutex,
+) !void {
+    while (true) {
+        var buffer = zimq.Message.empty();
+        defer buffer.deinit();
+        _ = try socket.recvMsg(&buffer, .{});
+
+        if (buffer.slice() == null) {
+            continue;
+        }
+
+        var stream = std.io.fixedBufferStream(buffer.slice().?);
+        const client_packet = packet.ClientPacket.deserialize(stream.reader()) catch {
+            continue;
+        };
+
+        mutex.lock();
+        defer mutex.unlock();
+
+        try packets.append(client_packet);
+    }
+}

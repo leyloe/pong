@@ -21,8 +21,8 @@
             .hash = "s2s-0.0.1-qt8ajW97AADgZZjymAzXPnLV3sR2Fo0r4k7WGJkfftJ1",
         },
         .zimq = .{
-            .url = "git+https://github.com/uyha/zimq.git#f82a9daeb92dc0b46257a7a187a6ac04d7cc0ab1",
-            .hash = "zimq-0.0.0-nw1ioNB1AQDqwOzxuUN1_0IKZNF0Mwe2CKFGax_zY4VG",
+            .url = "git+https://github.com/uyha/zimq.git#5a6f4e8487422bfdcd789db5f129aaeb73a2afb9",
+            .hash = "zimq-0.0.0-nw1ioKh3AQDhHVuha-fuUF2CbyLeS3b4kuROa_sR35Af",
         },
     },
 
