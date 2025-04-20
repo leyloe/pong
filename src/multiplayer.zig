@@ -117,7 +117,7 @@ pub fn create_host(
     var socket = try zimq.Socket.init(context, .pull);
     defer socket.deinit();
 
-    const addr = try std.fmt.allocPrintZ(std.heap.page_allocator, "udp://0.0.0.0:{d}", .{port});
+    const addr = try std.fmt.allocPrintZ(std.heap.page_allocator, "udp://*:{d}", .{port});
     try socket.bind(addr);
 
     var thread = try std.Thread.spawn(.{}, server_loop, .{
