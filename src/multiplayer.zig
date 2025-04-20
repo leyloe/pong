@@ -54,7 +54,8 @@ pub fn connect_to_host(
         defer buffer.clearRetainingCapacity();
 
         // receive the server packet
-        if (mutex.tryLock()) {
+        {
+            mutex.lock();
             defer mutex.unlock();
 
             const msg = packets.pop();
@@ -134,7 +135,8 @@ pub fn create_host(
         defer buffer.clearRetainingCapacity();
 
         // receive the client packet
-        if (mutex.tryLock()) {
+        {
+            mutex.lock();
             defer mutex.unlock();
 
             const msg = packets.pop();
