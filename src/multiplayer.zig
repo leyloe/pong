@@ -32,6 +32,13 @@ pub fn connect_to_host(
     const addr = try std.fmt.allocPrintZ(std.heap.page_allocator, "udp://{s}:{d}", .{ ip, port });
     try socket.connect(addr);
 
+    var thread = try std.Thread.spawn(.{}, client_loop, .{
+        socket,
+        &packets,
+        &mutex,
+    });
+    defer thread.join();
+
     try client_loop(socket, &packets, &mutex);
 
     const peer_size = player_size;
@@ -113,7 +120,12 @@ pub fn create_host(
     const addr = try std.fmt.allocPrintZ(std.heap.page_allocator, "udp://0.0.0.0:{d}", .{port});
     try socket.bind(addr);
 
-    try server_loop(socket, &packets, &mutex);
+    var thread = try std.Thread.spawn(.{}, server_loop, .{
+        socket,
+        &packets,
+        &mutex,
+    });
+    defer thread.join();
 
     const peer_size = player_size;
     const peer_position = rl.Vector2{ .x = 10, .y = screen.y / 2 - peer_size.y - 2 };
