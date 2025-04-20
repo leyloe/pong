@@ -1,5 +1,29 @@
 const std = @import("std");
 
+fn add_clap(
+    b: *std.Build,
+    exe: *std.Build.Step.Compile,
+) void {
+    const s2s_dep = b.dependency("clap", .{});
+    exe.root_module.addImport("clap", s2s_dep.module("clap"));
+}
+
+fn add_zimq(
+    b: *std.Build,
+    exe: *std.Build.Step.Compile,
+) void {
+    const zimq_dep = b.dependency("zimq", .{});
+    exe.root_module.addImport("zimq", zimq_dep.module("zimq"));
+}
+
+fn add_s2s(
+    b: *std.Build,
+    exe: *std.Build.Step.Compile,
+) void {
+    const s2s_dep = b.dependency("s2s", .{});
+    exe.root_module.addImport("s2s", s2s_dep.module("s2s"));
+}
+
 fn add_raylib(
     b: *std.Build,
     exe: *std.Build.Step.Compile,
@@ -37,6 +61,7 @@ fn create_build_options(
         .target = target,
         .optimize = optimize,
         .link_libc = true,
+        .link_libcpp = true,
     };
 
     switch (optimize) {
@@ -80,6 +105,9 @@ pub fn build(b: *std.Build) void {
     const exe = add_exe(b, target, optimize);
 
     add_raylib(b, exe);
+    add_s2s(b, exe);
+    add_clap(b, exe);
+    add_zimq(b, exe);
 
     b.installArtifact(exe);
 

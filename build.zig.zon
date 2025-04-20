@@ -12,6 +12,18 @@
             .url = "git+https://github.com/Not-Nik/raylib-zig?ref=devel#e072ff119be71727ec4e1b0cb6d8f892b32ff440",
             .hash = "raylib_zig-5.6.0-dev-KE8REGgxBQDoHuPWlO7RnY7M1jFlWV4kP1QY7r52GoP-",
         },
+        .clap = .{
+            .url = "git+https://github.com/Hejsil/zig-clap#a4e784da8399c51d5eeb5783e6a485b960d5c1f9",
+            .hash = "clap-0.10.0-oBajB8fkAQB0JvsrWLar4YZrseSZ9irFxHB7Hvy_bvxb",
+        },
+        .s2s = .{
+            .url = "git+https://github.com/ziglibs/s2s#76d7aea86c1d05afaddab9a1081b6dad68088756",
+            .hash = "s2s-0.0.1-qt8ajW97AADgZZjymAzXPnLV3sR2Fo0r4k7WGJkfftJ1",
+        },
+        .zimq = .{
+            .url = "git+https://github.com/uyha/zimq.git#5a6f4e8487422bfdcd789db5f129aaeb73a2afb9",
+            .hash = "zimq-0.0.0-nw1ioKh3AQDhHVuha-fuUF2CbyLeS3b4kuROa_sR35Af",
+        },
     },
 
     .paths = .{
