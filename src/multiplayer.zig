@@ -106,7 +106,7 @@ pub fn create_host(
     var context = try zimq.Context.init();
     defer context.deinit();
 
-    var socket = try zimq.Socket.init(context, .push);
+    var socket = try zimq.Socket.init(context, .pull);
     defer socket.deinit();
 
     const addr = try std.fmt.allocPrintZ(std.heap.page_allocator, "udp://0.0.0.0:{d}", .{port});
