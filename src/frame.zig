@@ -24,10 +24,7 @@ pub fn Frame(comptime S: type) type {
             @memcpy(buf[0..HEADER_SIZE], len_bytes[0..HEADER_SIZE]);
             @memcpy(buf[HEADER_SIZE..], buffer);
 
-            const bytes_written = try self.inner.writeAll(buf);
-            if (bytes_written != buf.len) {
-                return error.WriteError;
-            }
+            try self.inner.writeAll(buf);
         }
 
         pub fn readPacket(self: *Self, allocator: std.mem.Allocator) ![]u8 {

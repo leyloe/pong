@@ -13,19 +13,6 @@ fn add_clap(
     exe.root_module.addImport("clap", s2s_dep.module("clap"));
 }
 
-fn add_zimq(
-    b: *std.Build,
-    exe: *std.Build.Step.Compile,
-    target: std.Build.ResolvedTarget,
-    optimize: std.builtin.OptimizeMode,
-) void {
-    const zimq_dep = b.dependency("zimq", .{
-        .target = target,
-        .optimize = optimize,
-    });
-    exe.root_module.addImport("zimq", zimq_dep.module("zimq"));
-}
-
 fn add_s2s(
     b: *std.Build,
     exe: *std.Build.Step.Compile,
@@ -126,7 +113,6 @@ pub fn build(b: *std.Build) void {
     add_raylib(b, exe, target, optimize);
     add_s2s(b, exe, target, optimize);
     add_clap(b, exe, target, optimize);
-    add_zimq(b, exe, target, optimize);
 
     b.installArtifact(exe);
 

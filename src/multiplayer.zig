@@ -4,7 +4,7 @@ const Ball = @import("Ball.zig");
 const Paddle = @import("Paddle.zig");
 const Score = @import("Score.zig");
 const packet = @import("packet.zig");
-const zimq = @import("zimq");
+const net = @import("net.zig");
 
 pub fn connect_to_host(
     ip: []const u8,
@@ -23,19 +23,14 @@ pub fn connect_to_host(
 
     var mutex = std.Thread.Mutex{};
 
-    var context = try zimq.Context.init();
-    defer context.deinit();
-
-    var socket = try zimq.Socket.init(context, .pair);
-    defer socket.deinit();
-
-    const addr = try std.fmt.allocPrintZ(std.heap.page_allocator, "tcp://{s}:{d}", .{ ip, port });
-    try socket.connect(addr);
+    var client = try net.Client.init(ip, port);
+    defer client.deinit();
 
     _ = try std.Thread.spawn(.{}, client_loop, .{
-        socket,
+        &client,
         &packets,
         &mutex,
+        std.heap.page_allocator,
     });
 
     const peer_size = player_size;
@@ -81,7 +76,7 @@ pub fn connect_to_host(
             .paddle_y = player.position.y,
         };
         try client_packet.serialize(buffer.writer());
-        try socket.sendSlice(buffer.items, .{});
+        try client.send(std.heap.page_allocator, buffer.items);
 
         rl.beginDrawing();
         defer rl.endDrawing();
@@ -110,20 +105,15 @@ pub fn create_host(
 
     var mutex = std.Thread.Mutex{};
 
-    var context = try zimq.Context.init();
-    defer context.deinit();
-
-    var socket = try zimq.Socket.init(context, .pair);
-    defer socket.deinit();
-
-    const addr = try std.fmt.allocPrintZ(std.heap.page_allocator, "tcp://*:{d}", .{port});
-    try socket.bind(addr);
+    var server = try net.Server.init(port);
+    defer server.deinit();
 
     _ =
         try std.Thread.spawn(.{}, server_loop, .{
-            socket,
+            &server,
             &packets,
             &mutex,
+            std.heap.page_allocator,
         });
 
     const peer_size = player_size;
@@ -170,7 +160,7 @@ pub fn create_host(
             .score = score,
         };
         try server_packet.serialize(buffer.writer());
-        try socket.sendSlice(buffer.items, .{});
+        try server.send(std.heap.page_allocator, buffer.items);
 
         rl.beginDrawing();
         defer rl.endDrawing();
@@ -184,20 +174,16 @@ pub fn create_host(
 }
 
 pub fn client_loop(
-    socket: *zimq.Socket,
+    client: *net.Client,
     packets: *std.ArrayList(packet.HostPacket),
     mutex: *std.Thread.Mutex,
+    allocator: std.mem.Allocator,
 ) !void {
     while (true) {
-        var buffer = zimq.Message.empty();
-        defer buffer.deinit();
-        _ = try socket.recvMsg(&buffer, .{});
+        const buffer = try client.receive(allocator);
+        defer allocator.free(buffer);
 
-        if (buffer.slice() == null) {
-            continue;
-        }
-
-        var stream = std.io.fixedBufferStream(buffer.slice().?);
+        var stream = std.io.fixedBufferStream(buffer);
         const host_packet = packet.HostPacket.deserialize(stream.reader()) catch {
             continue;
         };
@@ -210,20 +196,16 @@ pub fn client_loop(
 }
 
 pub fn server_loop(
-    socket: *zimq.Socket,
+    server: *net.Server,
     packets: *std.ArrayList(packet.ClientPacket),
     mutex: *std.Thread.Mutex,
+    allocator: std.mem.Allocator,
 ) !void {
     while (true) {
-        var buffer = zimq.Message.empty();
-        defer buffer.deinit();
-        _ = try socket.recvMsg(&buffer, .{});
+        const buffer = try server.receive(allocator);
+        defer allocator.free(buffer);
 
-        if (buffer.slice() == null) {
-            continue;
-        }
-
-        var stream = std.io.fixedBufferStream(buffer.slice().?);
+        var stream = std.io.fixedBufferStream(buffer);
         const client_packet = packet.ClientPacket.deserialize(stream.reader()) catch {
             continue;
         };

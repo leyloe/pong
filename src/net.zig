@@ -16,7 +16,7 @@ pub const Server = struct {
             .in = loopback,
         };
 
-        const server = try localhost.listen(.{
+        var server = try localhost.listen(.{
             .reuse_address = true,
         });
 
