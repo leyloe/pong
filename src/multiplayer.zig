@@ -26,18 +26,17 @@ pub fn connect_to_host(
     var context = try zimq.Context.init();
     defer context.deinit();
 
-    var socket = try zimq.Socket.init(context, .push);
+    var socket = try zimq.Socket.init(context, .radio);
     defer socket.deinit();
 
     const addr = try std.fmt.allocPrintZ(std.heap.page_allocator, "udp://{s}:{d}", .{ ip, port });
     try socket.connect(addr);
 
-    var thread = try std.Thread.spawn(.{}, client_loop, .{
+    _ = try std.Thread.spawn(.{}, client_loop, .{
         socket,
         &packets,
         &mutex,
     });
-    defer thread.join();
 
     try client_loop(socket, &packets, &mutex);
 
@@ -114,18 +113,18 @@ pub fn create_host(
     var context = try zimq.Context.init();
     defer context.deinit();
 
-    var socket = try zimq.Socket.init(context, .pull);
+    var socket = try zimq.Socket.init(context, .dish);
     defer socket.deinit();
 
     const addr = try std.fmt.allocPrintZ(std.heap.page_allocator, "udp://*:{d}", .{port});
     try socket.bind(addr);
 
-    var thread = try std.Thread.spawn(.{}, server_loop, .{
-        socket,
-        &packets,
-        &mutex,
-    });
-    defer thread.join();
+    _ =
+        try std.Thread.spawn(.{}, server_loop, .{
+            socket,
+            &packets,
+            &mutex,
+        });
 
     const peer_size = player_size;
     const peer_position = rl.Vector2{ .x = 10, .y = screen.y / 2 - peer_size.y - 2 };
