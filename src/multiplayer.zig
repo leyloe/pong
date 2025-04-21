@@ -68,6 +68,8 @@ pub fn connect_to_host(
                 ball.position = host_packet.positions.ball;
                 peer.position.y = host_packet.positions.paddle_y;
                 score = host_packet.score;
+
+                ball.position.x = screen.x - ball.position.x;
             }
         }
 

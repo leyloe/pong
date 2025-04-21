@@ -28,9 +28,7 @@ fn add_raylib(
     b: *std.Build,
     exe: *std.Build.Step.Compile,
 ) void {
-    const raylib_dep = b.dependency("raylib_zig", .{
-        .shared = false,
-    });
+    const raylib_dep = b.dependency("raylib_zig", .{});
     const raylib_artifact = raylib_dep.artifact("raylib");
 
     exe.linkLibrary(raylib_artifact);
