@@ -123,10 +123,10 @@ pub fn build(b: *std.Build) void {
     const optimize = b.standardOptimizeOption(.{});
     const exe = add_exe(b, target, optimize);
 
-    add_raylib(b, exe);
-    add_s2s(b, exe);
-    add_clap(b, exe);
-    add_zimq(b, exe);
+    add_raylib(b, exe, target, optimize);
+    add_s2s(b, exe, target, optimize);
+    add_clap(b, exe, target, optimize);
+    add_zimq(b, exe, target, optimize);
 
     b.installArtifact(exe);
 
