@@ -17,7 +17,8 @@ jobs:
     - name: Set up Zig
       uses: korandoru/setup-zig@v1
       with:
-        version: 0.11.0  # Update to your preferred Zig version
+        zig-version: 0.11.0  # Update to your Zig version
+        target-platform: x86_64-windows  # Explicitly specify Windows target
 
     - name: Build Release
       run: zig build -Doptimize=ReleaseFast
