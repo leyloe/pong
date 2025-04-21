@@ -3,32 +3,52 @@ const std = @import("std");
 fn add_clap(
     b: *std.Build,
     exe: *std.Build.Step.Compile,
+    target: std.Build.ResolvedTarget,
+    optimize: std.builtin.OptimizeMode,
 ) void {
-    const s2s_dep = b.dependency("clap", .{});
+    const s2s_dep = b.dependency("clap", .{
+        .target = target,
+        .optimize = optimize,
+    });
     exe.root_module.addImport("clap", s2s_dep.module("clap"));
 }
 
 fn add_zimq(
     b: *std.Build,
     exe: *std.Build.Step.Compile,
+    target: std.Build.ResolvedTarget,
+    optimize: std.builtin.OptimizeMode,
 ) void {
-    const zimq_dep = b.dependency("zimq", .{});
+    const zimq_dep = b.dependency("zimq", .{
+        .target = target,
+        .optimize = optimize,
+    });
     exe.root_module.addImport("zimq", zimq_dep.module("zimq"));
 }
 
 fn add_s2s(
     b: *std.Build,
     exe: *std.Build.Step.Compile,
+    target: std.Build.ResolvedTarget,
+    optimize: std.builtin.OptimizeMode,
 ) void {
-    const s2s_dep = b.dependency("s2s", .{});
+    const s2s_dep = b.dependency("s2s", .{
+        .target = target,
+        .optimize = optimize,
+    });
     exe.root_module.addImport("s2s", s2s_dep.module("s2s"));
 }
 
 fn add_raylib(
     b: *std.Build,
     exe: *std.Build.Step.Compile,
+    target: std.Build.ResolvedTarget,
+    optimize: std.builtin.OptimizeMode,
 ) void {
-    const raylib_dep = b.dependency("raylib_zig", .{});
+    const raylib_dep = b.dependency("raylib_zig", .{
+        .target = target,
+        .optimize = optimize,
+    });
     const raylib_artifact = raylib_dep.artifact("raylib");
 
     exe.linkLibrary(raylib_artifact);
