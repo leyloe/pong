@@ -69,7 +69,6 @@ fn create_build_options(
         .ReleaseSafe => {},
         else => {
             options.strip = true;
-            options.single_threaded = true;
             options.error_tracing = false;
             options.pic = true;
         },
