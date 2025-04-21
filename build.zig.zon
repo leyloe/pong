@@ -1,7 +1,7 @@
 .{
     .name = .pong,
 
-    .version = "0.0.0",
+    .version = "1.0.0",
 
     .fingerprint = 0x2158414f80380937,
 
