@@ -26,10 +26,10 @@ pub fn connect_to_host(
     var context = try zimq.Context.init();
     defer context.deinit();
 
-    var socket = try zimq.Socket.init(context, .radio);
+    var socket = try zimq.Socket.init(context, .pair);
     defer socket.deinit();
 
-    const addr = try std.fmt.allocPrintZ(std.heap.page_allocator, "udp://{s}:{d}", .{ ip, port });
+    const addr = try std.fmt.allocPrintZ(std.heap.page_allocator, "tcp://{s}:{d}", .{ ip, port });
     try socket.connect(addr);
 
     _ = try std.Thread.spawn(.{}, client_loop, .{
@@ -113,10 +113,10 @@ pub fn create_host(
     var context = try zimq.Context.init();
     defer context.deinit();
 
-    var socket = try zimq.Socket.init(context, .dish);
+    var socket = try zimq.Socket.init(context, .pair);
     defer socket.deinit();
 
-    const addr = try std.fmt.allocPrintZ(std.heap.page_allocator, "udp://*:{d}", .{port});
+    const addr = try std.fmt.allocPrintZ(std.heap.page_allocator, "tcp://*:{d}", .{port});
     try socket.bind(addr);
 
     _ =
