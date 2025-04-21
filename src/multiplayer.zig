@@ -90,7 +90,7 @@ pub fn connect_to_host(
         ball.draw();
         player.draw();
         peer.draw();
-        score.draw(screenWidth);
+        score.draw_flipped(screenWidth);
     }
 }
 

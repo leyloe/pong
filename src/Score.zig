@@ -13,3 +13,8 @@ pub fn draw(self: *Self, screenWidth: i32) void {
     rl.drawText(rl.textFormat("%i", .{self.opponent}), @divTrunc(screenWidth, 4) - 20, 20, 80, .white);
     rl.drawText(rl.textFormat("%i", .{self.player}), 3 * @divTrunc(screenWidth, 4) - 20, 20, 80, .white);
 }
+
+pub fn draw_flipped(self: *Self, screenWidth: i32) void {
+    rl.drawText(rl.textFormat("%i", .{self.player}), @divTrunc(screenWidth, 4) - 20, 20, 80, .white);
+    rl.drawText(rl.textFormat("%i", .{self.opponent}), 3 * @divTrunc(screenWidth, 4) - 20, 20, 80, .white);
+}
