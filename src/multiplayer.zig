@@ -38,8 +38,6 @@ pub fn connect_to_host(
         &mutex,
     });
 
-    try client_loop(socket, &packets, &mutex);
-
     const peer_size = player_size;
     const peer_position = rl.Vector2{ .x = 10, .y = screen.y / 2 - peer_size.y - 2 };
 
