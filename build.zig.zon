@@ -21,8 +21,8 @@
             .hash = "s2s-0.0.1-qt8ajW97AADgZZjymAzXPnLV3sR2Fo0r4k7WGJkfftJ1",
         },
         .zimq = .{
-            .url = "https://github.com/leyloe/zimq/archive/refs/heads/patch-1.zip",
-            .hash = "zimq-0.0.0-nw1ioNx3AQArS6SDVs_ypG50HQo_d8caPj9xY_kZHX7G",
+            .url = "git+https://github.com/uyha/zimq#498a4a4076930e291cbae01d81e78e990214761f",
+            .hash = "zimq-0.0.0-nw1ioPKCAQA8DjjXD3omVoOqpEppuFk6QakXC0gW8D1H",
         },
     },
 
