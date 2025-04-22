@@ -12,11 +12,11 @@ zig build -Doptimize=ReleaseFast
 ```
 ## Multiplayer
 ### Do the following steps in order
-#### You run
+#### First, you run
 ```
 <executable> --serve <port>
 ```
-#### Your opponent runs
+#### Your opponent then runs
 ```
 <executable> --connect <address:port>
 ```
