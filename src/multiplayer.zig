@@ -24,7 +24,7 @@ pub fn connect_to_host(
     var client = try net.Client.init(ip, port, allocator);
     defer client.deinit();
 
-    _ = try std.Thread.spawn(.{}, network_loop, .{
+    _ = try std.Thread.spawn(.{}, read_loop, .{
         packet.HostPacket,
         &client,
         &latest_packet,
@@ -104,7 +104,7 @@ pub fn create_host(
     defer server.deinit();
 
     _ =
-        try std.Thread.spawn(.{}, network_loop, .{
+        try std.Thread.spawn(.{}, read_loop, .{
             packet.ClientPacket,
             &server,
             &latest_packet,
@@ -166,7 +166,7 @@ pub fn create_host(
     }
 }
 
-pub fn network_loop(
+pub fn read_loop(
     comptime T: type,
     connection: anytype,
     latest_packet: *packet.PacketMutex(T),
