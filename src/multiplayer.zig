@@ -18,9 +18,7 @@ pub fn connect_to_host(
     windowTitle: [:0]const u8,
     targetFPS: i32,
 ) !void {
-    var latest_packet: ?packet.HostPacket = null;
-
-    var mutex = std.Thread.Mutex{};
+    var latest_packet = packet.PacketMutex(packet.HostPacket).init(null);
 
     var client = try net.Client.init(ip, port);
     defer client.deinit();
@@ -28,7 +26,6 @@ pub fn connect_to_host(
     _ = try std.Thread.spawn(.{}, client_loop, .{
         &client,
         &latest_packet,
-        &mutex,
         std.heap.page_allocator,
     });
 
@@ -53,11 +50,11 @@ pub fn connect_to_host(
 
         // receive the server packet
         {
-            mutex.lock();
-            defer mutex.unlock();
+            latest_packet.lock();
+            defer latest_packet.unlock();
 
-            if (latest_packet) |host_packet| {
-                defer latest_packet = null;
+            if (latest_packet.inner) |host_packet| {
+                defer latest_packet.inner = null;
 
                 ball.position = host_packet.positions.ball;
                 peer.position.y = host_packet.positions.paddle_y;
@@ -99,9 +96,7 @@ pub fn create_host(
     windowTitle: [:0]const u8,
     targetFPS: i32,
 ) !void {
-    var latest_packet: ?packet.ClientPacket = null;
-
-    var mutex = std.Thread.Mutex{};
+    var latest_packet = packet.PacketMutex(packet.ClientPacket).init(null);
 
     var server = try net.Server.init(port);
     defer server.deinit();
@@ -110,7 +105,6 @@ pub fn create_host(
         try std.Thread.spawn(.{}, server_loop, .{
             &server,
             &latest_packet,
-            &mutex,
             std.heap.page_allocator,
         });
 
@@ -135,11 +129,11 @@ pub fn create_host(
 
         // receive the client packet
         {
-            mutex.lock();
-            defer mutex.unlock();
+            latest_packet.lock();
+            defer latest_packet.unlock();
 
-            if (latest_packet) |client_packet| {
-                defer latest_packet = null;
+            if (latest_packet.inner) |client_packet| {
+                defer latest_packet.inner = null;
                 peer.position.y = client_packet.paddle_y;
             }
         }
@@ -172,8 +166,7 @@ pub fn create_host(
 
 pub fn client_loop(
     client: *net.Client,
-    latest_packet: *?packet.HostPacket,
-    mutex: *std.Thread.Mutex,
+    latest_packet: *packet.PacketMutex(packet.HostPacket),
     allocator: std.mem.Allocator,
 ) !void {
     while (true) {
@@ -185,17 +178,16 @@ pub fn client_loop(
             continue;
         };
 
-        mutex.lock();
-        defer mutex.unlock();
+        latest_packet.lock();
+        defer latest_packet.unlock();
 
-        latest_packet.* = host_packet;
+        latest_packet.inner = host_packet;
     }
 }
 
 pub fn server_loop(
     server: *net.Server,
-    latest_packet: *?packet.ClientPacket,
-    mutex: *std.Thread.Mutex,
+    latest_packet: *packet.PacketMutex(packet.ClientPacket),
     allocator: std.mem.Allocator,
 ) !void {
     while (true) {
@@ -207,9 +199,9 @@ pub fn server_loop(
             continue;
         };
 
-        mutex.lock();
-        defer mutex.unlock();
+        latest_packet.lock();
+        defer latest_packet.unlock();
 
-        latest_packet.* = client_packet;
+        latest_packet.inner = client_packet;
     }
 }

@@ -1,7 +1,32 @@
 const rl = @import("raylib");
 const s2s = @import("s2s");
+const std = @import("std");
 
 const Score = @import("Score.zig");
+
+pub fn PacketMutex(comptime T: type) type {
+    return struct {
+        const Self = @This();
+
+        mutex: std.Thread.Mutex,
+        inner: ?T,
+
+        pub fn init(packet: ?T) Self {
+            return Self{
+                .inner = packet,
+                .mutex = .{},
+            };
+        }
+
+        pub fn lock(self: *Self) void {
+            self.mutex.lock();
+        }
+
+        pub fn unlock(self: *Self) void {
+            self.mutex.unlock();
+        }
+    };
+}
 
 pub const HostPacket = struct {
     const Self = @This();
