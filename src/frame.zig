@@ -22,6 +22,7 @@ pub fn Frame(comptime S: type) type {
 
             std.mem.writeInt(u32, &len_bytes, len, .big);
 
+            self.buffer.clearRetainingCapacity();
             try self.buffer.ensureTotalCapacity(buffer.len + HEADER_SIZE);
 
             try self.buffer.appendSlice(len_bytes[0..HEADER_SIZE]);
