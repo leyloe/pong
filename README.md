@@ -10,7 +10,7 @@ zig build -Doptimize=ReleaseFast
 ```
 <executable>
 ```
-## Multiplayer Instructions
+## Multiplayer
 ### Do the following steps in order
 ### You run
 ```
