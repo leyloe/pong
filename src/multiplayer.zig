@@ -24,7 +24,7 @@ pub fn connect_to_host(
     var client = try net.Client.init(ip, port, allocator);
     defer client.deinit();
 
-    var queue = packet.PacketQueueMutex(packet.ClientPacket).init(allocator);
+    var queued_packet = packet.PacketMutex(packet.ClientPacket).init();
 
     _ = try std.Thread.spawn(.{}, read_loop, .{
         packet.HostPacket,
@@ -35,7 +35,7 @@ pub fn connect_to_host(
     _ = try std.Thread.spawn(.{}, write_loop, .{
         packet.ClientPacket,
         &client,
-        &queue,
+        &queued_packet,
         allocator,
     });
 
@@ -77,10 +77,10 @@ pub fn connect_to_host(
             .paddle_y = player.position.y,
         };
         {
-            queue.mutex.lock();
-            defer queue.mutex.unlock();
+            queued_packet.mutex.lock();
+            defer queued_packet.mutex.unlock();
 
-            try queue.inner.append(client_packet);
+            queued_packet.inner = client_packet;
         }
 
         rl.beginDrawing();
@@ -111,7 +111,7 @@ pub fn create_host(
     var server = try net.Server.init(port, allocator);
     defer server.deinit();
 
-    var queue = packet.PacketQueueMutex(packet.HostPacket).init(allocator);
+    var queued_packet = packet.PacketMutex(packet.HostPacket).init();
 
     _ =
         try std.Thread.spawn(.{}, read_loop, .{
@@ -123,7 +123,7 @@ pub fn create_host(
     _ = try std.Thread.spawn(.{}, write_loop, .{
         packet.HostPacket,
         &server,
-        &queue,
+        &queued_packet,
         allocator,
     });
 
@@ -165,10 +165,10 @@ pub fn create_host(
             .score = score,
         };
         {
-            queue.mutex.lock();
-            defer queue.mutex.unlock();
+            queued_packet.mutex.lock();
+            defer queued_packet.mutex.unlock();
 
-            try queue.inner.append(server_packet);
+            queued_packet.inner = server_packet;
         }
 
         rl.beginDrawing();
@@ -205,7 +205,7 @@ fn read_loop(
 fn write_loop(
     comptime T: type,
     connection: anytype,
-    packet_queue: *packet.PacketQueueMutex(T),
+    queued_packet: *packet.PacketMutex(T),
     allocator: std.mem.Allocator,
 ) !void {
     var buffer = std.ArrayList(u8).init(allocator);
@@ -215,11 +215,14 @@ fn write_loop(
         var network_packet: T = undefined;
 
         {
-            packet_queue.mutex.lock();
-            defer packet_queue.mutex.unlock();
+            queued_packet.mutex.lock();
+            defer queued_packet.mutex.unlock();
 
-            network_packet = packet_queue.inner.pop() orelse continue;
-            packet_queue.inner.clearRetainingCapacity();
+            network_packet = queued_packet.inner orelse {
+                continue;
+            };
+
+            queued_packet.inner = null;
         }
 
         buffer.clearRetainingCapacity();

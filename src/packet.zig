@@ -28,26 +28,6 @@ pub fn PacketMutex(comptime T: type) type {
     };
 }
 
-pub fn PacketQueueMutex(comptime T: type) type {
-    return struct {
-        const Self = @This();
-
-        mutex: std.Thread.Mutex,
-        inner: std.ArrayList(T),
-
-        pub fn init(allocator: std.mem.Allocator) Self {
-            return Self{
-                .inner = std.ArrayList(T).init(allocator),
-                .mutex = .{},
-            };
-        }
-
-        pub fn deinit(self: *Self) void {
-            self.inner.deinit();
-        }
-    };
-}
-
 pub const HostPacket = struct {
     const Self = @This();
 
