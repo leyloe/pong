@@ -32,7 +32,7 @@ pub fn Frame(comptime S: type) type {
         }
 
         pub fn readPacket(self: *Self) ![]u8 {
-            var len: [4]u8 = undefined;
+            var len: [HEADER_SIZE]u8 = undefined;
 
             var bytes_read = try self.inner.readAll(len[0..HEADER_SIZE]);
             if (bytes_read != HEADER_SIZE) {
