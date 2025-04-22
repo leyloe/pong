@@ -80,7 +80,7 @@ pub fn connect_to_host(
             queue.mutex.lock();
             defer queue.mutex.unlock();
 
-            try queue.queue.append(client_packet);
+            try queue.inner.append(client_packet);
         }
 
         rl.beginDrawing();
@@ -168,7 +168,7 @@ pub fn create_host(
             queue.mutex.lock();
             defer queue.mutex.unlock();
 
-            try queue.queue.append(server_packet);
+            try queue.inner.append(server_packet);
         }
 
         rl.beginDrawing();
@@ -218,7 +218,7 @@ fn write_loop(
             packet_queue.mutex.lock();
             defer packet_queue.mutex.unlock();
 
-            network_packet = packet_queue.queue.pop() orelse continue;
+            network_packet = packet_queue.inner.pop() orelse continue;
         }
 
         buffer.clearRetainingCapacity();

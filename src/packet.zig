@@ -32,18 +32,18 @@ pub fn PacketQueueMutex(comptime T: type) type {
     return struct {
         const Self = @This();
 
-        queue: std.ArrayList(T),
         mutex: std.Thread.Mutex,
+        inner: std.ArrayList(T),
 
         pub fn init(allocator: std.mem.Allocator) Self {
             return Self{
-                .queue = std.ArrayList(T).init(allocator),
+                .inner = std.ArrayList(T).init(allocator),
                 .mutex = .{},
             };
         }
 
         pub fn deinit(self: *Self) void {
-            self.queue.deinit();
+            self.inner.deinit();
         }
     };
 }
