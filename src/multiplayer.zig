@@ -24,7 +24,8 @@ pub fn connect_to_host(
     var client = try net.Client.init(ip, port, allocator);
     defer client.deinit();
 
-    _ = try std.Thread.spawn(.{}, client_loop, .{
+    _ = try std.Thread.spawn(.{}, network_loop, .{
+        packet.HostPacket,
         &client,
         &latest_packet,
     });
@@ -103,7 +104,8 @@ pub fn create_host(
     defer server.deinit();
 
     _ =
-        try std.Thread.spawn(.{}, server_loop, .{
+        try std.Thread.spawn(.{}, network_loop, .{
+            packet.ClientPacket,
             &server,
             &latest_packet,
         });
@@ -164,40 +166,22 @@ pub fn create_host(
     }
 }
 
-pub fn client_loop(
-    client: *net.Client,
-    latest_packet: *packet.PacketMutex(packet.HostPacket),
+pub fn network_loop(
+    comptime T: type,
+    connection: anytype,
+    latest_packet: *packet.PacketMutex(T),
 ) !void {
     while (true) {
-        const buffer = try client.receive();
+        const buffer = try connection.receive();
 
         var stream = std.io.fixedBufferStream(buffer);
-        const host_packet = packet.HostPacket.deserialize(stream.reader()) catch {
+        const network_packet = T.deserialize(stream.reader()) catch {
             continue;
         };
 
         latest_packet.lock();
         defer latest_packet.unlock();
 
-        latest_packet.inner = host_packet;
-    }
-}
-
-pub fn server_loop(
-    server: *net.Server,
-    latest_packet: *packet.PacketMutex(packet.ClientPacket),
-) !void {
-    while (true) {
-        const buffer = try server.receive();
-
-        var stream = std.io.fixedBufferStream(buffer);
-        const client_packet = packet.ClientPacket.deserialize(stream.reader()) catch {
-            continue;
-        };
-
-        latest_packet.lock();
-        defer latest_packet.unlock();
-
-        latest_packet.inner = client_packet;
+        latest_packet.inner = network_packet;
     }
 }
