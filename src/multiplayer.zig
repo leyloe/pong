@@ -25,6 +25,7 @@ pub fn connect_to_host(
     defer client.deinit();
 
     var queued_packet = packet.PacketMutex(packet.ClientPacket).init();
+    var old_packet: packet.ClientPacket = undefined;
 
     _ = try std.Thread.spawn(.{}, read_loop, .{
         packet.HostPacket,
@@ -73,14 +74,17 @@ pub fn connect_to_host(
         peer.update(&ball, &screen);
 
         // send the client packet
-        const client_packet = packet.ClientPacket{
+        var client_packet = packet.ClientPacket{
             .paddle_y = player.position.y,
         };
         {
-            queued_packet.mutex.lock();
-            defer queued_packet.mutex.unlock();
+            if (client_packet.changed(&old_packet)) {
+                queued_packet.mutex.lock();
+                defer queued_packet.mutex.unlock();
 
-            queued_packet.inner = client_packet;
+                queued_packet.inner = client_packet;
+                old_packet = client_packet;
+            }
         }
 
         rl.beginDrawing();

@@ -48,6 +48,13 @@ pub const ClientPacket = struct {
 
     paddle_y: f32,
 
+    pub fn changed(
+        self: *Self,
+        other: *const ClientPacket,
+    ) bool {
+        return self.paddle_y != other.paddle_y;
+    }
+
     pub fn serialize(self: *Self, stream: anytype) !void {
         try s2s.serialize(stream, Self, self.*);
     }
