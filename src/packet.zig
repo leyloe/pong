@@ -11,9 +11,9 @@ pub fn PacketMutex(comptime T: type) type {
         mutex: std.Thread.Mutex,
         inner: ?T,
 
-        pub fn init(packet: ?T) Self {
+        pub fn init() Self {
             return Self{
-                .inner = packet,
+                .inner = null,
                 .mutex = .{},
             };
         }

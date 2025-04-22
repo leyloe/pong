@@ -18,7 +18,7 @@ pub fn connect_to_host(
     windowTitle: [:0]const u8,
     targetFPS: i32,
 ) !void {
-    var latest_packet = packet.PacketMutex(packet.HostPacket).init(null);
+    var latest_packet = packet.PacketMutex(packet.HostPacket).init();
 
     var client = try net.Client.init(ip, port);
     defer client.deinit();
@@ -96,7 +96,7 @@ pub fn create_host(
     windowTitle: [:0]const u8,
     targetFPS: i32,
 ) !void {
-    var latest_packet = packet.PacketMutex(packet.ClientPacket).init(null);
+    var latest_packet = packet.PacketMutex(packet.ClientPacket).init();
 
     var server = try net.Server.init(port);
     defer server.deinit();
