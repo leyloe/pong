@@ -219,6 +219,7 @@ fn write_loop(
             defer packet_queue.mutex.unlock();
 
             network_packet = packet_queue.inner.pop() orelse continue;
+            packet_queue.inner.clearRetainingCapacity();
         }
 
         buffer.clearRetainingCapacity();
