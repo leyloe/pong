@@ -41,7 +41,6 @@ pub fn Frame(comptime S: type) type {
 
             const packet_len = std.mem.readInt(u32, &len, .big);
 
-            try self.buffer.ensureTotalCapacity(packet_len);
             try self.buffer.resize(packet_len);
 
             bytes_read = try self.inner.readAll(self.buffer.items[0..packet_len]);
