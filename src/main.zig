@@ -30,7 +30,7 @@ const player_size = rl.Vector2{ .x = 25, .y = 120 };
 const player_position = rl.Vector2{ .x = screen.x - player_size.x - 10, .y = center.y - player_size.y / 2 };
 
 pub fn main() !void {
-    const allocator = std.heap.page_allocator;
+    const allocator = std.heap.c_allocator;
 
     var app_mode: AppMode = .Singleplayer;
 
