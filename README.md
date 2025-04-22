@@ -4,7 +4,7 @@ zig build -Doptimize=ReleaseFast
 ```
 ## Help
 ```
-<executable> -h
+<executable> --help
 ```
 ## Singleplayer
 ```
