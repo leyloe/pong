@@ -9,6 +9,7 @@ pub const Server = struct {
 
     pub fn init(
         port: u16,
+        allocator: std.mem.Allocator,
     ) !Self {
         const loopback = try std.net.Ip4Address.parse("0.0.0.0", port);
 
@@ -24,20 +25,21 @@ pub const Server = struct {
 
         return Self{
             .server = server,
-            .frame = frame.Frame(std.net.Stream).init(connection.stream),
+            .frame = try frame.Frame(std.net.Stream).init(connection.stream, allocator),
         };
     }
 
-    pub fn send(self: *Self, allocator: std.mem.Allocator, buffer: []const u8) !void {
-        try self.frame.writePacket(allocator, buffer);
+    pub fn send(self: *Self, buffer: []const u8) !void {
+        try self.frame.writePacket(buffer);
     }
 
-    pub fn receive(self: *Self, allocator: std.mem.Allocator) ![]u8 {
-        return try self.frame.readPacket(allocator);
+    pub fn receive(self: *Self) ![]u8 {
+        return try self.frame.readPacket();
     }
 
     pub fn deinit(self: *Self) void {
         defer self.server.deinit();
+        defer self.frame.deinit();
     }
 };
 
@@ -50,6 +52,7 @@ pub const Client = struct {
     pub fn init(
         ip: []const u8,
         port: u16,
+        allocator: std.mem.Allocator,
     ) !Self {
         const peer = try std.net.Address.parseIp4(ip, port);
 
@@ -57,19 +60,20 @@ pub const Client = struct {
 
         return Self{
             .stream = stream,
-            .frame = frame.Frame(std.net.Stream).init(stream),
+            .frame = try frame.Frame(std.net.Stream).init(stream, allocator),
         };
     }
 
-    pub fn send(self: *Self, allocator: std.mem.Allocator, buffer: []const u8) !void {
-        try self.frame.writePacket(allocator, buffer);
+    pub fn send(self: *Self, buffer: []const u8) !void {
+        try self.frame.writePacket(buffer);
     }
 
-    pub fn receive(self: *Self, allocator: std.mem.Allocator) ![]u8 {
-        return try self.frame.readPacket(allocator);
+    pub fn receive(self: *Self) ![]u8 {
+        return try self.frame.readPacket();
     }
 
     pub fn deinit(self: *Self) void {
-        self.stream.close();
+        defer self.stream.close();
+        defer self.frame.deinit();
     }
 };

@@ -21,13 +21,12 @@ pub fn connect_to_host(
 ) !void {
     var latest_packet = packet.PacketMutex(packet.HostPacket).init();
 
-    var client = try net.Client.init(ip, port);
+    var client = try net.Client.init(ip, port, allocator);
     defer client.deinit();
 
     _ = try std.Thread.spawn(.{}, client_loop, .{
         &client,
         &latest_packet,
-        allocator,
     });
 
     const peer_size = player_size;
@@ -73,7 +72,7 @@ pub fn connect_to_host(
             .paddle_y = player.position.y,
         };
         try client_packet.serialize(buffer.writer());
-        try client.send(allocator, buffer.items);
+        try client.send(buffer.items);
 
         rl.beginDrawing();
         defer rl.endDrawing();
@@ -100,14 +99,13 @@ pub fn create_host(
 ) !void {
     var latest_packet = packet.PacketMutex(packet.ClientPacket).init();
 
-    var server = try net.Server.init(port);
+    var server = try net.Server.init(port, allocator);
     defer server.deinit();
 
     _ =
         try std.Thread.spawn(.{}, server_loop, .{
             &server,
             &latest_packet,
-            allocator,
         });
 
     const peer_size = player_size;
@@ -153,7 +151,7 @@ pub fn create_host(
             .score = score,
         };
         try server_packet.serialize(buffer.writer());
-        try server.send(allocator, buffer.items);
+        try server.send(buffer.items);
 
         rl.beginDrawing();
         defer rl.endDrawing();
@@ -169,11 +167,9 @@ pub fn create_host(
 pub fn client_loop(
     client: *net.Client,
     latest_packet: *packet.PacketMutex(packet.HostPacket),
-    allocator: std.mem.Allocator,
 ) !void {
     while (true) {
-        const buffer = try client.receive(allocator);
-        defer allocator.free(buffer);
+        const buffer = try client.receive();
 
         var stream = std.io.fixedBufferStream(buffer);
         const host_packet = packet.HostPacket.deserialize(stream.reader()) catch {
@@ -190,11 +186,9 @@ pub fn client_loop(
 pub fn server_loop(
     server: *net.Server,
     latest_packet: *packet.PacketMutex(packet.ClientPacket),
-    allocator: std.mem.Allocator,
 ) !void {
     while (true) {
-        const buffer = try server.receive(allocator);
-        defer allocator.free(buffer);
+        const buffer = try server.receive();
 
         var stream = std.io.fixedBufferStream(buffer);
         const client_packet = packet.ClientPacket.deserialize(stream.reader()) catch {

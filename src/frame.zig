@@ -7,27 +7,31 @@ pub fn Frame(comptime S: type) type {
         const Self = @This();
 
         inner: S,
+        buffer: std.ArrayList(u8),
 
-        pub fn init(stream: S) Self {
-            return Self{ .inner = stream };
+        pub fn init(stream: S, allocator: std.mem.Allocator) !Self {
+            return Self{
+                .inner = stream,
+                .buffer = std.ArrayList(u8).init(allocator),
+            };
         }
 
-        pub fn writePacket(self: *Self, allocator: std.mem.Allocator, buffer: []const u8) !void {
+        pub fn writePacket(self: *Self, buffer: []const u8) !void {
             const len: u32 = @intCast(buffer.len);
             var len_bytes: [HEADER_SIZE]u8 = undefined;
 
             std.mem.writeInt(u32, &len_bytes, len, .big);
 
-            var buf = try allocator.alloc(u8, buffer.len + HEADER_SIZE);
-            defer allocator.free(buf);
+            self.buffer.clearRetainingCapacity();
+            try self.buffer.ensureTotalCapacity(buffer.len + HEADER_SIZE);
 
-            @memcpy(buf[0..HEADER_SIZE], len_bytes[0..HEADER_SIZE]);
-            @memcpy(buf[HEADER_SIZE..], buffer);
+            try self.buffer.appendSlice(len_bytes[0..HEADER_SIZE]);
+            try self.buffer.appendSlice(buffer[0..buffer.len]);
 
-            try self.inner.writeAll(buf);
+            try self.inner.writeAll(self.buffer.items);
         }
 
-        pub fn readPacket(self: *Self, allocator: std.mem.Allocator) ![]u8 {
+        pub fn readPacket(self: *Self) ![]u8 {
             var len: [4]u8 = undefined;
 
             var bytes_read = try self.inner.readAll(len[0..HEADER_SIZE]);
@@ -37,14 +41,20 @@ pub fn Frame(comptime S: type) type {
 
             const packet_len = std.mem.readInt(u32, &len, .big);
 
-            var buf = try allocator.alloc(u8, packet_len);
+            self.buffer.clearRetainingCapacity();
+            try self.buffer.ensureTotalCapacity(packet_len);
+            try self.buffer.resize(packet_len);
 
-            bytes_read = try self.inner.readAll(buf[0..packet_len]);
+            bytes_read = try self.inner.readAll(self.buffer.items[0..packet_len]);
             if (bytes_read != packet_len) {
                 return error.ReadError;
             }
 
-            return buf;
+            return self.buffer.items[0..packet_len];
+        }
+
+        pub fn deinit(self: *Self) void {
+            defer self.buffer.deinit();
         }
     };
 }
