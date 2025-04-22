@@ -18,8 +18,7 @@ pub fn connect_to_host(
     windowTitle: [:0]const u8,
     targetFPS: i32,
 ) !void {
-    var packets = std.ArrayList(packet.HostPacket).init(std.heap.page_allocator);
-    defer packets.deinit();
+    var latest_packet: ?packet.HostPacket = null;
 
     var mutex = std.Thread.Mutex{};
 
@@ -28,7 +27,7 @@ pub fn connect_to_host(
 
     _ = try std.Thread.spawn(.{}, client_loop, .{
         &client,
-        &packets,
+        &latest_packet,
         &mutex,
         std.heap.page_allocator,
     });
@@ -57,9 +56,9 @@ pub fn connect_to_host(
             mutex.lock();
             defer mutex.unlock();
 
-            const msg = packets.pop();
+            if (latest_packet) |host_packet| {
+                defer latest_packet = null;
 
-            if (msg) |host_packet| {
                 ball.position = host_packet.positions.ball;
                 peer.position.y = host_packet.positions.paddle_y;
                 score = host_packet.score;
@@ -100,8 +99,7 @@ pub fn create_host(
     windowTitle: [:0]const u8,
     targetFPS: i32,
 ) !void {
-    var packets = std.ArrayList(packet.ClientPacket).init(std.heap.page_allocator);
-    defer packets.deinit();
+    var latest_packet: ?packet.ClientPacket = null;
 
     var mutex = std.Thread.Mutex{};
 
@@ -111,7 +109,7 @@ pub fn create_host(
     _ =
         try std.Thread.spawn(.{}, server_loop, .{
             &server,
-            &packets,
+            &latest_packet,
             &mutex,
             std.heap.page_allocator,
         });
@@ -140,9 +138,8 @@ pub fn create_host(
             mutex.lock();
             defer mutex.unlock();
 
-            const msg = packets.pop();
-
-            if (msg) |client_packet| {
+            if (latest_packet) |client_packet| {
+                defer latest_packet = null;
                 peer.position.y = client_packet.paddle_y;
             }
         }
@@ -175,7 +172,7 @@ pub fn create_host(
 
 pub fn client_loop(
     client: *net.Client,
-    packets: *std.ArrayList(packet.HostPacket),
+    latest_packet: *?packet.HostPacket,
     mutex: *std.Thread.Mutex,
     allocator: std.mem.Allocator,
 ) !void {
@@ -191,13 +188,13 @@ pub fn client_loop(
         mutex.lock();
         defer mutex.unlock();
 
-        try packets.append(host_packet);
+        latest_packet.* = host_packet;
     }
 }
 
 pub fn server_loop(
     server: *net.Server,
-    packets: *std.ArrayList(packet.ClientPacket),
+    latest_packet: *?packet.ClientPacket,
     mutex: *std.Thread.Mutex,
     allocator: std.mem.Allocator,
 ) !void {
@@ -213,6 +210,6 @@ pub fn server_loop(
         mutex.lock();
         defer mutex.unlock();
 
-        try packets.append(client_packet);
+        latest_packet.* = client_packet;
     }
 }
