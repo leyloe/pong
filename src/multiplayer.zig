@@ -24,10 +24,19 @@ pub fn connect_to_host(
     var client = try net.Client.init(ip, port, allocator);
     defer client.deinit();
 
+    var queue = packet.PacketQueueMutex(packet.ClientPacket).init(allocator);
+
     _ = try std.Thread.spawn(.{}, read_loop, .{
         packet.HostPacket,
         &client,
         &latest_packet,
+    });
+
+    _ = try std.Thread.spawn(.{}, write_loop, .{
+        packet.ClientPacket,
+        &client,
+        &queue,
+        allocator,
     });
 
     const peer_size = player_size;
@@ -43,12 +52,7 @@ pub fn connect_to_host(
 
     rl.setTargetFPS(targetFPS);
 
-    var buffer = std.ArrayList(u8).init(allocator);
-    defer buffer.deinit();
-
     while (!rl.windowShouldClose()) {
-        defer buffer.clearRetainingCapacity();
-
         // receive the server packet
         {
             latest_packet.lock();
@@ -69,11 +73,15 @@ pub fn connect_to_host(
         peer.update(&ball, &screen);
 
         // send the client packet
-        var client_packet = packet.ClientPacket{
+        const client_packet = packet.ClientPacket{
             .paddle_y = player.position.y,
         };
-        try client_packet.serialize(buffer.writer());
-        try client.send(buffer.items);
+        {
+            queue.mutex.lock();
+            defer queue.mutex.unlock();
+
+            try queue.queue.append(client_packet);
+        }
 
         rl.beginDrawing();
         defer rl.endDrawing();
@@ -103,12 +111,21 @@ pub fn create_host(
     var server = try net.Server.init(port, allocator);
     defer server.deinit();
 
+    var queue = packet.PacketQueueMutex(packet.HostPacket).init(allocator);
+
     _ =
         try std.Thread.spawn(.{}, read_loop, .{
             packet.ClientPacket,
             &server,
             &latest_packet,
         });
+
+    _ = try std.Thread.spawn(.{}, write_loop, .{
+        packet.HostPacket,
+        &server,
+        &queue,
+        allocator,
+    });
 
     const peer_size = player_size;
     const peer_position = rl.Vector2{ .x = 10, .y = screen.y / 2 - peer_size.y - 2 };
@@ -123,12 +140,7 @@ pub fn create_host(
 
     rl.setTargetFPS(targetFPS);
 
-    var buffer = std.ArrayList(u8).init(allocator);
-    defer buffer.deinit();
-
     while (!rl.windowShouldClose()) {
-        defer buffer.clearRetainingCapacity();
-
         // receive the client packet
         {
             latest_packet.lock();
@@ -145,15 +157,19 @@ pub fn create_host(
         peer.update(&ball, &screen);
 
         // send the server packet
-        var server_packet = packet.HostPacket{
+        const server_packet = packet.HostPacket{
             .positions = packet.Positions{
                 .paddle_y = player.position.y,
                 .ball = ball.position,
             },
             .score = score,
         };
-        try server_packet.serialize(buffer.writer());
-        try server.send(buffer.items);
+        {
+            queue.mutex.lock();
+            defer queue.mutex.unlock();
+
+            try queue.queue.append(server_packet);
+        }
 
         rl.beginDrawing();
         defer rl.endDrawing();
@@ -166,7 +182,7 @@ pub fn create_host(
     }
 }
 
-pub fn read_loop(
+fn read_loop(
     comptime T: type,
     connection: anytype,
     latest_packet: *packet.PacketMutex(T),
@@ -183,5 +199,31 @@ pub fn read_loop(
         defer latest_packet.unlock();
 
         latest_packet.inner = network_packet;
+    }
+}
+
+fn write_loop(
+    comptime T: type,
+    connection: anytype,
+    packet_queue: *packet.PacketQueueMutex(T),
+    allocator: std.mem.Allocator,
+) !void {
+    var buffer = std.ArrayList(u8).init(allocator);
+    defer buffer.deinit();
+
+    while (true) {
+        var network_packet: T = undefined;
+
+        {
+            packet_queue.mutex.lock();
+            defer packet_queue.mutex.unlock();
+
+            network_packet = packet_queue.queue.pop() orelse continue;
+        }
+
+        buffer.clearRetainingCapacity();
+
+        try network_packet.serialize(buffer.writer());
+        try connection.send(buffer.items);
     }
 }
