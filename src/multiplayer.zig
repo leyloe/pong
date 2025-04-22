@@ -214,13 +214,13 @@ fn write_loop(
     while (true) {
         var network_packet: T = undefined;
 
-        network_packet = queued_packet.inner orelse {
-            continue;
-        };
-
         {
             queued_packet.mutex.lock();
             defer queued_packet.mutex.unlock();
+
+            network_packet = queued_packet.inner orelse {
+                continue;
+            };
 
             queued_packet.inner = null;
         }
