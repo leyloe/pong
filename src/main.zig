@@ -30,8 +30,7 @@ const player_size = rl.Vector2{ .x = 25, .y = 120 };
 const player_position = rl.Vector2{ .x = screen.x - player_size.x - 10, .y = center.y - player_size.y / 2 };
 
 pub fn main() !void {
-    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
-    defer _ = gpa.deinit();
+    const allocator = std.heap.page_allocator;
 
     var app_mode: AppMode = .Singleplayer;
 
@@ -44,7 +43,7 @@ pub fn main() !void {
     var diag = clap.Diagnostic{};
     var res = clap.parse(clap.Help, &params, clap.parsers.default, .{
         .diagnostic = &diag,
-        .allocator = gpa.allocator(),
+        .allocator = allocator,
     }) catch |err| {
         diag.report(std.io.getStdErr().writer(), err) catch {};
         return clap.help(std.io.getStdErr().writer(), clap.Help, &params, .{});
@@ -55,7 +54,7 @@ pub fn main() !void {
         return clap.help(std.io.getStdErr().writer(), clap.Help, &params, .{});
 
     if (res.args.connect) |arg| {
-        const addr = util.parse_connect_arg(arg, gpa.allocator()) catch |err| {
+        const addr = util.parse_connect_arg(arg, allocator) catch |err| {
             std.debug.print("Invalid address format, run with --help for more information\n", .{});
             return err;
         };
@@ -78,6 +77,7 @@ pub fn main() !void {
                 center,
                 windowTitle,
                 targetFPS,
+                allocator,
             );
         },
         .Client => |client| {
@@ -92,6 +92,7 @@ pub fn main() !void {
                 center,
                 windowTitle,
                 targetFPS,
+                allocator,
             );
         },
         .Singleplayer => {

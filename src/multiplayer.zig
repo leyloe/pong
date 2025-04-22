@@ -17,6 +17,7 @@ pub fn connect_to_host(
     center: rl.Vector2,
     windowTitle: [:0]const u8,
     targetFPS: i32,
+    allocator: std.mem.Allocator,
 ) !void {
     var latest_packet = packet.PacketMutex(packet.HostPacket).init();
 
@@ -26,7 +27,7 @@ pub fn connect_to_host(
     _ = try std.Thread.spawn(.{}, client_loop, .{
         &client,
         &latest_packet,
-        std.heap.page_allocator,
+        allocator,
     });
 
     const peer_size = player_size;
@@ -42,7 +43,7 @@ pub fn connect_to_host(
 
     rl.setTargetFPS(targetFPS);
 
-    var buffer = std.ArrayList(u8).init(std.heap.page_allocator);
+    var buffer = std.ArrayList(u8).init(allocator);
     defer buffer.deinit();
 
     while (!rl.windowShouldClose()) {
@@ -72,7 +73,7 @@ pub fn connect_to_host(
             .paddle_y = player.position.y,
         };
         try client_packet.serialize(buffer.writer());
-        try client.send(std.heap.page_allocator, buffer.items);
+        try client.send(allocator, buffer.items);
 
         rl.beginDrawing();
         defer rl.endDrawing();
@@ -95,6 +96,7 @@ pub fn create_host(
     center: rl.Vector2,
     windowTitle: [:0]const u8,
     targetFPS: i32,
+    allocator: std.mem.Allocator,
 ) !void {
     var latest_packet = packet.PacketMutex(packet.ClientPacket).init();
 
@@ -105,7 +107,7 @@ pub fn create_host(
         try std.Thread.spawn(.{}, server_loop, .{
             &server,
             &latest_packet,
-            std.heap.page_allocator,
+            allocator,
         });
 
     const peer_size = player_size;
@@ -121,7 +123,7 @@ pub fn create_host(
 
     rl.setTargetFPS(targetFPS);
 
-    var buffer = std.ArrayList(u8).init(std.heap.page_allocator);
+    var buffer = std.ArrayList(u8).init(allocator);
     defer buffer.deinit();
 
     while (!rl.windowShouldClose()) {
@@ -151,7 +153,7 @@ pub fn create_host(
             .score = score,
         };
         try server_packet.serialize(buffer.writer());
-        try server.send(std.heap.page_allocator, buffer.items);
+        try server.send(allocator, buffer.items);
 
         rl.beginDrawing();
         defer rl.endDrawing();
