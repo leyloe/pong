@@ -12,7 +12,7 @@ pub fn PacketMutex(comptime T: type) type {
         inner: ?T,
 
         pub fn init() Self {
-            return Self{
+            return .{
                 .inner = null,
                 .mutex = .{},
             };
@@ -49,7 +49,7 @@ pub const ClientPacket = struct {
     paddle_y: f32,
 
     pub fn init(paddle_y: f32) Self {
-        return Self{ .paddle_y = paddle_y };
+        return .{ .paddle_y = paddle_y };
     }
 
     pub fn changed(

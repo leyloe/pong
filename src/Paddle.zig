@@ -20,7 +20,7 @@ pub fn init(
     speed: f32,
     mode: Mode,
 ) Self {
-    return Self{
+    return .{
         .position = position,
         .size = size,
         .speed = speed,

@@ -6,7 +6,7 @@ player: u32,
 opponent: u32,
 
 pub fn init() Self {
-    return Self{ .player = 0, .opponent = 0 };
+    return .{ .player = 0, .opponent = 0 };
 }
 
 pub fn draw(self: *Self, screenWidth: i32) void {

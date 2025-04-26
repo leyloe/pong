@@ -10,7 +10,7 @@ pub fn Frame(comptime S: type) type {
         buffer: std.ArrayList(u8),
 
         pub fn init(stream: S, allocator: std.mem.Allocator) !Self {
-            return Self{
+            return .{
                 .inner = stream,
                 .buffer = std.ArrayList(u8).init(allocator),
             };

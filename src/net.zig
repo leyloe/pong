@@ -23,7 +23,7 @@ pub const Server = struct {
 
         const connection = try server.accept();
 
-        return Self{
+        return .{
             .server = server,
             .frame = try frame.Frame(std.net.Stream).init(connection.stream, allocator),
         };
@@ -58,7 +58,7 @@ pub const Client = struct {
 
         const stream = try std.net.tcpConnectToAddress(peer);
 
-        return Self{
+        return .{
             .stream = stream,
             .frame = try frame.Frame(std.net.Stream).init(stream, allocator),
         };

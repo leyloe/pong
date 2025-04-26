@@ -12,7 +12,7 @@ pub fn init(
     speed: f32,
     radius: f32,
 ) Self {
-    return Self{
+    return .{
         .position = position,
         .radius = radius,
         .speed = rl.Vector2{ .x = speed, .y = speed },
