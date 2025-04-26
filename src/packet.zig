@@ -50,7 +50,7 @@ pub const ClientPacket = struct {
 
     pub fn changed(
         self: *Self,
-        other: *const ClientPacket,
+        other: *const Self,
     ) bool {
         return self.paddle_y != other.paddle_y;
     }
