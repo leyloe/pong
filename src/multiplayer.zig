@@ -25,7 +25,7 @@ pub fn connect_to_host(
     defer client.deinit();
 
     var queued_packet = packet.PacketMutex(packet.ClientPacket).init();
-    var old_packet: packet.ClientPacket = .{ .paddle_y = player_position.y };
+    var old_packet = packet.ClientPacket.init(player_position.y);
 
     _ = try std.Thread.spawn(.{}, read_loop, .{
         packet.HostPacket,

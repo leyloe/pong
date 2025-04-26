@@ -48,6 +48,10 @@ pub const ClientPacket = struct {
 
     paddle_y: f32,
 
+    pub fn init(paddle_y: f32) Self {
+        return Self{ .paddle_y = paddle_y };
+    }
+
     pub fn changed(
         self: *Self,
         other: *const Self,
